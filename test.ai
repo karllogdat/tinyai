@@ -1,0 +1,11 @@
+"""
+This is a sample file for testing the lexical analyzer
+"""
+
+myVariable = 123
+name = "karl"
+
+# of course this will not become true
+myVariable == name
+
+myVariable = 4 * 6 % 5 / 2 ** 4
