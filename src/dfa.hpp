@@ -110,4 +110,18 @@ public:
   TransitionTable build();
 };
 
+class TransitionTableGenerator
+{
+private:
+  std::vector<RegexPattern> patterns;
+
+public:
+  TransitionTableGenerator(const std::vector<RegexPattern> &pats)
+      : patterns(pats)
+  {
+  }
+
+  TransitionTable generate();
+};
+
 #endif

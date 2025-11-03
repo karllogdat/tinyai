@@ -230,3 +230,75 @@ TransitionTable TransitionTableBuilder::build()
 
   return table;
 }
+
+TransitionTable TransitionTableGenerator::generate()
+{
+  // Combine NFAs for all regex patterns
+  NFA combinedNFA;
+  ThompsonConstruction thompson(combinedNFA);
+
+  NFAState *globalStart = combinedNFA.createState();
+  NFAState *globalAccept = combinedNFA.createState();
+  combinedNFA.startState = globalStart;
+  combinedNFA.acceptState = globalAccept;
+  globalAccept->isAccept = true;
+
+  for (const auto &pattern : patterns) {
+    std::cout << "Processing pattern: " << pattern.pattern << std::endl;
+
+    RegexLexer lexer(pattern.pattern);
+    std::vector<Token> tokens = lexer.tokenize();
+
+    std::cout << "Tokens: ";
+    for (const auto &tk : tokens) {
+      if (tk.type == TokenType::CHAR)
+        std::cout << " CHAR('"
+                  << (tk.value == '\n' ? "\\n" : std::string(1, tk.value))
+                  << "')";
+      else if (tk.type == TokenType::CHAR_CLASS)
+        std::cout << " CHAR_CLASS";
+      else if (tk.type == TokenType::LPAREN)
+        std::cout << " LPAREN";
+      else if (tk.type == TokenType::RPAREN)
+        std::cout << " RPAREN";
+      else if (tk.type == TokenType::STAR)
+        std::cout << " STAR";
+      else if (tk.type == TokenType::PIPE)
+        std::cout << " PIPE";
+      else if (tk.type == TokenType::PLUS)
+        std::cout << " PLUS";
+      else if (tk.type == TokenType::QUESTION)
+        std::cout << " QUESTION";
+      else if (tk.type == TokenType::END)
+        std::cout << " END";
+    }
+    std::cout << std::endl;
+
+    RegexParser parser(tokens);
+    auto ASTroot = parser.parse();
+    std::cout << "Parsed AST." << std::endl;
+
+    auto fragment = thompson.build(ASTroot);
+    std::cout << "Built NFA fragment." << std::endl;
+
+    // Ensure fragment's accept is not left marked as final
+    if (fragment.accept) {
+      fragment.accept->isAccept = false;
+      fragment.accept->tokenType = pattern.tokenType;
+      std::cout << "Set fragment accept state ID " << fragment.accept->id
+                << " token type to " << pattern.tokenType << std::endl;
+    }
+
+    // Connect fragments to globals
+    combinedNFA.addTransition(globalStart, fragment.start, '\0');
+    combinedNFA.addTransition(fragment.accept, globalAccept, '\0');
+  }
+
+  SubsetConstruction subsetConv(combinedNFA);
+  DFA dfa = subsetConv.convert();
+
+  TransitionTableBuilder tableBuilder(dfa);
+  TransitionTable table = tableBuilder.build();
+
+  return table;
+}
