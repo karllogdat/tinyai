@@ -10,6 +10,7 @@ myVariable == name
 
 myVariable = 4 * 6 % 5 / 2 ** 4
 
+<<<<<<< HEAD
 'a'
 'asd'
 
@@ -30,3 +31,44 @@ to_array read_csv to_tensor normalize flatten concat
 slice sort filter 
 
 then end do
+=======
+if myVariable > 0 then
+    print(name)
+else
+    return
+end
+
+int age = 21;
+float rate = 0.5;
+tensor w = zeros(2, 2);
+
+log1 = (age > 18) and not (rate == 1.0)
+log2 = (age < 30) or (name == "karl")
+
+r1 = age != 10
+r2 = age <= 30
+r3 = age >= 5
+r4 = age < 99
+r5 = age > 0
+
+matrix m = [[1,2],[3,4]];
+dict info = { "key": 1, "val": 2 };
+
+do while (age > 0) {
+    age = age - 1
+} end
+
+func greet(x, y) {
+    print(x, y);
+}
+
+for i in [1,2,3] {
+    continue
+}
+while (age < 30) {
+    break
+}
+
+ok = true
+fail = false
+>>>>>>> master
