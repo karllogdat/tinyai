@@ -9,3 +9,10 @@ name = "karl"
 myVariable == name
 
 myVariable = 4 * 6 % 5 / 2 ** 4
+
+'a'
+'asd'
+
+== < <= > >= != (){}[],;:
+
+(6 / 7) * 69 - 420

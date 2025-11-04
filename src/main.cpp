@@ -9,6 +9,22 @@
 #include <sstream>
 #include <string>
 
+bool fileExists(const std::string &filename)
+{
+  std::ifstream file(filename);
+  return file.good();
+}
+
+bool correctExtension(const std::string &filename, const std::string &extension)
+{
+  size_t extPos = filename.rfind(extension);
+  if (extPos == std::string::npos) {
+    return false;
+  }
+  std::string fileExt = filename.substr(extPos);
+  return fileExt == extension;
+}
+
 std::string readFileToString(const std::string &filename)
 {
   std::ifstream file(filename);
@@ -17,8 +33,26 @@ std::string readFileToString(const std::string &filename)
   return buffer.str();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " <input_file>" << std::endl;
+    return 1;
+  }
+  std::string inputFile = argv[1];
+
+  if (!fileExists(inputFile)) {
+    std::cerr << "Error: File '" << inputFile << "' does not exist."
+              << std::endl;
+    return 1;
+  }
+
+  if (!correctExtension(inputFile, ".ai")) {
+    std::cerr << "Error: File '" << inputFile
+              << "' does not have the correct '.ai' extension." << std::endl;
+    return 1;
+  }
+
   std::cout << "Starting Lexer Engine Test..." << std::endl;
   std::vector<RegexPattern> patterns = {
     RegexPattern("[a-zA-Z][a-zA-Z0-9_]*", "IDENTIFIER"),
@@ -58,7 +92,7 @@ int main()
   TransitionTable table = tableGenerator.generate();
 
   TableDrivenLexer lexer(table);
-  std::string input = readFileToString("test.ai");
+  std::string input = readFileToString(inputFile);
   lexer.lex(input);
 
   return 0;
