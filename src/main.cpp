@@ -26,6 +26,7 @@ int main()
                  "COMMENT"), // Match everything except newline after #
     RegexPattern("\\\"\\\"\\\"[\\s\\S]*\\\"\\\"\\\"", "MULTILINE_STRING"),
     RegexPattern("\\\"[^\\\"\\n]*\\\"", "STRING"),
+    RegexPattern("\\'[^\\'\\n]\\'", "CHAR"),
     RegexPattern("\\d+", "NUMBER"),
     RegexPattern("\\s+", "WHITESPACE"),
     RegexPattern("\\d+\\.\\d+", "FLOAT"),
@@ -34,8 +35,23 @@ int main()
     RegexPattern("\\*\\*", "POWER"),
     RegexPattern("-", "MINUS"),
     RegexPattern("/", "SLASH"),
-    RegexPattern("==", "EQEQ"),
-    RegexPattern("=", "EQUALS")
+    RegexPattern("==", "EQUAL"),
+    RegexPattern("=", "ASSIGN"),
+    RegexPattern("%", "MODULO"),
+    RegexPattern("<=", "LESS_EQUAL"),
+    RegexPattern("<", "LESS_THAN"),
+    RegexPattern(">=", "GREATER_EQUAL"),
+    RegexPattern(">", "GREATER_THAN"),
+    RegexPattern("!=", "NOT_EQUAL"),
+    RegexPattern("\\(", "LEFT_PARENTHESIS"),
+    RegexPattern("\\)", "RIGHT_PARENTHESIS"),
+    RegexPattern("\\[", "LEFT_SQUARE_BRACKET"),
+    RegexPattern("\\]", "RIGHT_SQUARE_BRACKET"),
+    RegexPattern("\\{", "LEFT_CURLY_BRACE"),
+    RegexPattern("\\}", "RIGHT_CURLY_BRACE"),
+    RegexPattern(",", "COMMA"),
+    RegexPattern(":", "COLON"),
+    RegexPattern(";", "SEMI_COLON"),
   };
 
   TransitionTableGenerator tableGenerator(patterns);
