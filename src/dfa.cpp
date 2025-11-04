@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <queue>
 #include <stdexcept>
@@ -301,4 +302,148 @@ TransitionTable TransitionTableGenerator::generate()
   TransitionTable table = tableBuilder.build();
 
   return table;
+}
+
+void TransitionTableGenerator::generateToFile(const std::string &filename)
+{
+  TransitionTable table = generate();
+
+  std::ofstream outFile(filename);
+  if (!outFile.is_open()) {
+    throw std::runtime_error("Failed to open file for writing: " + filename);
+  }
+
+  // helper to produce a C char literal with escapes
+  auto escapeChar = [](char c) -> std::string {
+    switch (c) {
+      case '\n':
+        return "\\n";
+      case '\r':
+        return "\\r";
+      case '\t':
+        return "\\t";
+      case '\\':
+        return "\\\\";
+      case '\'':
+        return "\\'";
+      case '\"':
+        return "\\\"";
+      default:
+        if (std::isprint(static_cast<unsigned char>(c)))
+          return std::string(1, c);
+        char buf[5];
+        std::snprintf(
+            buf, sizeof(buf), "\\x%02X", static_cast<unsigned char>(c));
+        return std::string(buf);
+    }
+  };
+
+  // sanitize token enum names to be valid C identifiers
+  auto sanitize = [](const std::string &s) -> std::string {
+    std::string out;
+    for (size_t i = 0; i < s.size(); ++i) {
+      char ch = s[i];
+      if ((i == 0 && std::isalpha((unsigned char)ch)) ||
+          (i > 0 && (std::isalnum((unsigned char)ch) || ch == '_')))
+        out.push_back(ch);
+      else if (ch == ' ' || ch == '-' || ch == '.')
+        out.push_back('_');
+      else
+        out.push_back('_');
+    }
+    if (out.empty() || !std::isalpha((unsigned char)out[0]))
+      out = "T_" + out;
+    return out;
+  };
+
+  // build deterministic token type id map
+  std::map<std::string, int> tokenTypeIds;
+  int tokenCounter = 0;
+  for (const auto &p : table.stateTokenTypes) {
+    const std::string &tt = p.second;
+    if (tokenTypeIds.find(tt) == tokenTypeIds.end())
+      tokenTypeIds[tt] = tokenCounter++;
+  }
+
+  // sizes
+  int stateCount = static_cast<int>(table.table.size());
+  int symbolCount = static_cast<int>(table.alphabet.size());
+
+  outFile << "/* Generated transition table */\n\n";
+  outFile << "#include <stddef.h>\n\n";
+  outFile << "const int STATE_COUNT = " << stateCount << ";\n";
+  outFile << "const int SYMBOL_COUNT = " << symbolCount << ";\n\n";
+
+  // symbol array
+  outFile << "const char ALPHABET[SYMBOL_COUNT] = { ";
+  for (size_t i = 0; i < table.alphabet.size(); ++i) {
+    outFile << "'" << escapeChar(table.alphabet[i]) << "'";
+    if (i + 1 < table.alphabet.size())
+      outFile << ", ";
+  }
+  outFile << " };\n\n";
+
+  // symbolToId as array mapping char -> id (use -1 for not in alphabet)
+  outFile << "const int SYMBOL_TO_ID[256] = {";
+  for (int ch = 0; ch < 256; ++ch) {
+    auto it = table.symbolToId.find(static_cast<char>(ch));
+    if (it != table.symbolToId.end())
+      outFile << it->second;
+    else
+      outFile << -1;
+    if (ch != 255)
+      outFile << ", ";
+  }
+  outFile << " };\n\n";
+
+  // transition table (STATE_COUNT x SYMBOL_COUNT)
+  outFile << "const int TRANSITION_TABLE[STATE_COUNT][SYMBOL_COUNT] = {\n";
+  for (int r = 0; r < stateCount; ++r) {
+    outFile << "  { ";
+    for (int c = 0; c < symbolCount; ++c) {
+      outFile << table.table[r][c];
+      if (c + 1 < symbolCount)
+        outFile << ", ";
+    }
+    outFile << " }";
+    if (r + 1 < stateCount)
+      outFile << ",";
+    outFile << "\n";
+  }
+  outFile << "};\n\n";
+
+  // start state
+  outFile << "const int START_STATE_ID = " << table.startStateId << ";\n\n";
+
+  // accept states: boolean array per state
+  outFile << "const int ACCEPT_STATE_IDS[STATE_COUNT] = { ";
+  for (int s = 0; s < stateCount; ++s) {
+    outFile << (table.acceptStateIds.count(s) ? 1 : 0);
+    if (s + 1 < stateCount)
+      outFile << ", ";
+  }
+  outFile << " };\n\n";
+
+  // token enum
+  outFile << "typedef enum {\n";
+  for (const auto &pair : tokenTypeIds) {
+    outFile << "  " << sanitize(pair.first) << " = " << pair.second << ",\n";
+  }
+  outFile << "  TOKEN_TYPE_COUNT = " << tokenCounter << "\n";
+  outFile << "} TokenType;\n\n";
+
+  // state -> token mapping (-1 for none)
+  outFile << "const int STATE_TOKEN_TYPE[STATE_COUNT] = { ";
+  for (int s = 0; s < stateCount; ++s) {
+    auto it = table.stateTokenTypes.find(s);
+    if (it != table.stateTokenTypes.end())
+      outFile << tokenTypeIds[it->second];
+    else
+      outFile << -1;
+    if (s + 1 < stateCount)
+      outFile << ", ";
+  }
+  outFile << " };\n";
+
+  outFile.close();
 }

@@ -122,6 +122,7 @@ public:
   }
 
   TransitionTable generate();
+  void generateToFile(const std::string &filename);
 };
 
 #endif
