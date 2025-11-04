@@ -10,28 +10,6 @@ myVariable == name
 
 myVariable = 4 * 6 % 5 / 2 ** 4
 
-<<<<<<< HEAD
-'a'
-'asd'
-
-== < <= > >= != (){}[],;:
-
-(6 / 7) * 69 - 420
-
-and or not
-
-if else elif for while break continue return func import 
-from as print in use with numpy 
-
-int float bool char string tensor array matrix void 
-
-rand zeros ones mean sum dot max min std var 
-
-to_array read_csv to_tensor normalize flatten concat 
-slice sort filter 
-
-then end do
-=======
 if myVariable > 0 then
     print(name)
 else
@@ -71,4 +49,3 @@ while (age < 30) {
 
 ok = true
 fail = false
->>>>>>> master
