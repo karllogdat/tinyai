@@ -55,20 +55,75 @@ int main(int argc, char *argv[])
 
   std::cout << "Starting Lexer Engine Test..." << std::endl;
   std::vector<RegexPattern> patterns = {
-    RegexPattern("[a-zA-Z][a-zA-Z0-9_]*", "IDENTIFIER"),
-    RegexPattern("#[^\n]*",
-                 "COMMENT"), // Match everything except newline after #
+    // keywords first to ensure they are matched before identifiers
+    RegexPattern("if", "IF_TOK"),
+    RegexPattern("else", "ELSE_TOK"),
+    RegexPattern("elif", "ELIF_TOK"),
+    RegexPattern("for", "FOR_TOK"),
+    RegexPattern("while", "WHILE_TOK"),
+    RegexPattern("break", "BREAK_TOK"),
+    RegexPattern("continue", "CONTINUE_TOK"),
+    RegexPattern("return", "RETURN_TOK"),
+    RegexPattern("func", "FUNC_TOK"),
+    RegexPattern("import", "IMPORT_TOK"),
+    RegexPattern("from", "FROM_TOK"),
+    RegexPattern("as", "AS_TOK"),
+    RegexPattern("print", "PRINT_TOK"),
+    RegexPattern("in", "IN_TOK"),
+    RegexPattern("use", "USE_TOK"),
+    RegexPattern("with", "WITH_TOK"),
+    RegexPattern("numpy", "NUMPY_TOK"),
+    // reserved words data types
+    RegexPattern("int", "INT_TOK"),
+    RegexPattern("float", "FLOAT_TOK"),
+    RegexPattern("bool", "BOOL_TOK"),
+    RegexPattern("char", "CHAR_TOK"),
+    RegexPattern("string", "STRING_TOK"),
+    RegexPattern("tensor", "TENSOR_TOK"),
+    RegexPattern("matrix", "MATRIX_TOK"),
+    RegexPattern("array", "ARRAY_TOK"),
+    RegexPattern("void", "VOID_TOK"),
+    // reserved words math functions
+    RegexPattern("rand", "RAND_TOK"),
+    RegexPattern("zeros", "ZEROS_TOK"),
+    RegexPattern("ones", "ONES_TOK"),
+    RegexPattern("mean", "MEAN_TOK"),
+    RegexPattern("sum", "SUM_TOK"),
+    RegexPattern("dot", "DOT_TOK"),
+    RegexPattern("max", "MAX_TOK"),
+    RegexPattern("min", "MIN_TOK"),
+    RegexPattern("std", "STD_TOK"),
+    RegexPattern("var", "VAR_TOK"),
+    // reserved words data handling
+    RegexPattern("to_array", "TOARRAY_TOK"),
+    RegexPattern("read_csv", "READCSV_TOK"),
+    RegexPattern("to_tensor", "TOTENSOR_TOK"),
+    // reserved words statistical operations
+    RegexPattern("normalize", "NORMALIZE_TOK"),
+    RegexPattern("flatten", "FLATTEN_TOK"),
+    RegexPattern("concat", "CONCAT_TOK"),
+    RegexPattern("slice", "SLICE_TOK"),
+    RegexPattern("sort", "SORT_TOK"),
+    RegexPattern("filter", "FILTER_TOK"),
+    // noise words
+    RegexPattern("then", "THEN"),
+    RegexPattern("end", "END"),
+    RegexPattern("do", "DO"),
+    // general patterns
+    RegexPattern("#[^\n]*", "COMMENT"),
     RegexPattern("\\\"\\\"\\\"[\\s\\S]*\\\"\\\"\\\"", "MULTILINE_STRING"),
-    RegexPattern("\\\"[^\\\"\\n]*\\\"", "STRING"),
-    RegexPattern("\\'[^\\'\\n]\\'", "CHAR"),
-    RegexPattern("\\d+", "NUMBER"),
+    RegexPattern("\\\"[^\\\"\\n]*\\\"", "STRING_LITERAL"),
+    RegexPattern("\\'[^\\'\\n]\\'", "CHAR_LITERAL"),
+    RegexPattern("\\d+", "INT_LITERAL"),
     RegexPattern("\\s+", "WHITESPACE"),
-    RegexPattern("\\d+\\.\\d+", "FLOAT"),
+    RegexPattern("\\d+\\.\\d+", "FLOAT_LITERAL"),
+    // arithmetic operations
     RegexPattern("\\+", "PLUS"),
     RegexPattern("\\*", "STAR"),
     RegexPattern("\\*\\*", "POWER"),
     RegexPattern("-", "MINUS"),
     RegexPattern("/", "SLASH"),
+    // assignment and comparison
     RegexPattern("==", "EQUAL"),
     RegexPattern("=", "ASSIGN"),
     RegexPattern("%", "MODULO"),
@@ -77,6 +132,11 @@ int main(int argc, char *argv[])
     RegexPattern(">=", "GREATER_EQUAL"),
     RegexPattern(">", "GREATER_THAN"),
     RegexPattern("!=", "NOT_EQUAL"),
+    // logical operations
+    RegexPattern("and", "AND"),
+    RegexPattern("or", "OR"),
+    RegexPattern("not", "NOT"),
+    // delimiters
     RegexPattern("\\(", "LEFT_PARENTHESIS"),
     RegexPattern("\\)", "RIGHT_PARENTHESIS"),
     RegexPattern("\\[", "LEFT_SQUARE_BRACKET"),
@@ -86,6 +146,8 @@ int main(int argc, char *argv[])
     RegexPattern(",", "COMMA"),
     RegexPattern(":", "COLON"),
     RegexPattern(";", "SEMI_COLON"),
+    // identifers (last to ensure keywords are matched first)
+    RegexPattern("[a-zA-Z][a-zA-Z0-9_]*", "IDENTIFIER"),
   };
 
   TransitionTableGenerator tableGenerator(patterns);
