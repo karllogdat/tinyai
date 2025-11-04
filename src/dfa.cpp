@@ -308,7 +308,59 @@ void TransitionTableGenerator::generateToFile(const std::string &filename)
 {
   TransitionTable table = generate();
 
-  std::ofstream outFile(filename);
+  std::ofstream headerFile(filename + ".h");
+  if (!headerFile.is_open()) {
+    throw std::runtime_error(
+        "Failed to open header file for writing: " + filename + ".h");
+  }
+
+  // table sizes
+  int stateCount = static_cast<int>(table.table.size());
+  int symbolCount = static_cast<int>(table.alphabet.size());
+
+  headerFile << "#ifndef TRANSITION_TABLE_H\n";
+  headerFile << "#define TRANSITION_TABLE_H\n\n";
+  headerFile << "#define STATE_COUNT " << stateCount << "\n";
+  headerFile << "#define SYMBOL_COUNT " << symbolCount << "\n\n";
+  headerFile << "extern const char ALPHABET[SYMBOL_COUNT];\n";
+  headerFile << "extern const int SYMBOL_TO_ID[256];\n";
+  headerFile
+      << "extern const int TRANSITION_TABLE[STATE_COUNT][SYMBOL_COUNT];\n\n";
+  headerFile << "#define START_STATE_ID " << table.startStateId << "\n\n";
+  headerFile << "extern const int ACCEPT_STATE_IDS[STATE_COUNT];\n\n";
+  headerFile << "typedef enum {\n";
+  // build deterministic token type id map
+  std::map<std::string, int> tokenTypeIds;
+  int tokenCounter = 0;
+  for (const auto &p : table.stateTokenTypes) {
+    const std::string &tt = p.second;
+    if (tokenTypeIds.find(tt) == tokenTypeIds.end())
+      tokenTypeIds[tt] = tokenCounter++;
+  }
+  for (const auto &pair : tokenTypeIds) {
+    // sanitize token enum names to be valid C identifiers
+    std::string sanitized;
+    for (size_t i = 0; i < pair.first.size(); ++i) {
+      char ch = pair.first[i];
+      if ((i == 0 && std::isalpha((unsigned char)ch)) ||
+          (i > 0 && (std::isalnum((unsigned char)ch) || ch == '_')))
+        sanitized.push_back(ch);
+      else if (ch == ' ' || ch == '-' || ch == '.')
+        sanitized.push_back('_');
+      else
+        sanitized.push_back('_');
+    }
+    if (sanitized.empty() || !std::isalpha((unsigned char)sanitized[0]))
+      sanitized = "T_" + sanitized;
+
+    headerFile << "  " << sanitized << " = " << pair.second << ",\n";
+  }
+  headerFile << "  TOKEN_TYPE_COUNT = " << tokenCounter << "\n";
+  headerFile << "} TokenType;\n\n";
+  headerFile << "extern const int STATE_TOKEN_TYPE[STATE_COUNT];\n\n";
+  headerFile << "#endif // TRANSITION_TABLE_H\n";
+
+  std::ofstream outFile(filename + ".c");
   if (!outFile.is_open()) {
     throw std::runtime_error("Failed to open file for writing: " + filename);
   }
@@ -356,23 +408,9 @@ void TransitionTableGenerator::generateToFile(const std::string &filename)
     return out;
   };
 
-  // build deterministic token type id map
-  std::map<std::string, int> tokenTypeIds;
-  int tokenCounter = 0;
-  for (const auto &p : table.stateTokenTypes) {
-    const std::string &tt = p.second;
-    if (tokenTypeIds.find(tt) == tokenTypeIds.end())
-      tokenTypeIds[tt] = tokenCounter++;
-  }
-
-  // sizes
-  int stateCount = static_cast<int>(table.table.size());
-  int symbolCount = static_cast<int>(table.alphabet.size());
-
   outFile << "/* Generated transition table */\n\n";
-  outFile << "#include <stddef.h>\n\n";
-  outFile << "const int STATE_COUNT = " << stateCount << ";\n";
-  outFile << "const int SYMBOL_COUNT = " << symbolCount << ";\n\n";
+  outFile << "#include <stddef.h>\n";
+  outFile << "#include \"" << filename << ".h\"\n\n";
 
   // symbol array
   outFile << "const char ALPHABET[SYMBOL_COUNT] = { ";
@@ -412,9 +450,6 @@ void TransitionTableGenerator::generateToFile(const std::string &filename)
   }
   outFile << "};\n\n";
 
-  // start state
-  outFile << "const int START_STATE_ID = " << table.startStateId << ";\n\n";
-
   // accept states: boolean array per state
   outFile << "const int ACCEPT_STATE_IDS[STATE_COUNT] = { ";
   for (int s = 0; s < stateCount; ++s) {
@@ -423,14 +458,6 @@ void TransitionTableGenerator::generateToFile(const std::string &filename)
       outFile << ", ";
   }
   outFile << " };\n\n";
-
-  // token enum
-  outFile << "typedef enum {\n";
-  for (const auto &pair : tokenTypeIds) {
-    outFile << "  " << sanitize(pair.first) << " = " << pair.second << ",\n";
-  }
-  outFile << "  TOKEN_TYPE_COUNT = " << tokenCounter << "\n";
-  outFile << "} TokenType;\n\n";
 
   // state -> token mapping (-1 for none)
   outFile << "const int STATE_TOKEN_TYPE[STATE_COUNT] = { ";

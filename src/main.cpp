@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
   TransitionTableGenerator tableGenerator(patterns);
   TransitionTable table = tableGenerator.generate();
-  tableGenerator.generateToFile("transition_table.h");
+  tableGenerator.generateToFile("transition_table");
 
   TableDrivenLexer lexer(table);
   std::string input = readFileToString(inputFile);
