@@ -12,24 +12,8 @@ This project implements a table-driven lexer that combines multiple regular expr
   - **nfa.cpp**: Implementation of the NFA functionality.
   - **dfa.hpp**: Header file for the DFA representation.
   - **dfa.cpp**: Implementation of the DFA functionality.
-  - **engine.hpp**: Header file for combining regex patterns. UNUSED.
-  - **engine.cpp**: Implementation of the regex combination logic. UNUSED.
-
-**ALL INCLUDE CONTENTS ARE UNUSED**
-- **include/**: Contains public interface headers for the lexer.
-  - **table_driven_lexer/**: Namespace for the lexer components.
-    - **regex_parser.hpp**: Public interface for regex parsing.
-    - **nfa.hpp**: Public interface for NFA functionality.
-    - **dfa.hpp**: Public interface for DFA functionality.
-
-**ALL EXAMPLE CONTENTS ARE UNUSED**
-- **examples/**: Contains example implementations.
-  - **combine_regexes.cpp**: Demonstrates how to combine multiple regex patterns.
-
-**ALL TEST CONTENTS ARE UNUSED**
-- **tests/**: Contains unit tests for the project.
-  - **test_regex.cpp**: Tests for regex parsing and NFA/DFA functionalities.
-  - **CMakeLists.txt**: Configuration for building tests.
+  - **lexer.hpp**: Header file for lexical analyzer.
+  - **lexer.cpp**: Implementation file for lexical analyzer.
 
 - **CMakeLists.txt**: Main configuration file for building the project using CMake.
 
@@ -37,30 +21,34 @@ This project implements a table-driven lexer that combines multiple regular expr
 
 ## Building the Project
 
-To build the project, you can use either CMake or Make. 
+To build the project, you can use either CMake or Make.
 
 ### Using CMake
 
 1. Create a build directory:
-   ```
+
+   ```shell
    mkdir build
    cd build
    ```
 
 2. Run CMake to configure the project:
-   ```
+
+   ```shell
    cmake ..
    ```
 
 3. Build the project:
-   ```
+
+   ```shell
    make
    ```
 
 ### Using Make
 
 Simply run:
-```
+
+```shell
 make
 ```
 
@@ -68,14 +56,14 @@ make
 
 After building the project, you can run the application by executing the compiled binary. The application will combine the specified regex patterns into a single e-NFA, convert it to a DFA, and test various input strings for matches.
 
-## Testing
-
-To run the tests, navigate to the `tests` directory and use CMake to build and run the tests:
+```shell
+.\lexer.exe .\test.ai
 ```
-cd tests
-cmake .
-make
-./test_regex
+
+Alternatively, follow the following format if lexing other `.ai` files.
+
+```shell
+.\lexer <input-file>
 ```
 
 ## Contributing
