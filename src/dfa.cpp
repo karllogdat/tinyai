@@ -70,17 +70,26 @@ DFA SubsetConstruction::convert()
   dfa.startState = dfaStartState;
   stateMapping[startClosure] = dfaStartState;
 
-  // Check for accept states and token types in the closure
+  // Check for accept states and token types in the closre
+  int bestPriority = INT_MAX;
+  std::optional<std::string> bestTokenType = std::nullopt;
+
   for (NFAState *nfaState : startClosure) {
     if (nfaState->isAccept) {
       dfaStartState->isAccept = true;
-      if (nfaState->tokenType) {
-        dfaStartState->tokenType = nfaState->tokenType;
-        std::cout << "Setting token type for DFA state " << dfaStartState->id
-                  << ": " << *nfaState->tokenType << std::endl;
+      if (nfaState->tokenType && nfaState->tokenPriority < bestPriority) {
+        // dfaStartState->tokenType = nfaState->tokenType
+        bestTokenType = nfaState->tokenType;
+        bestPriority = nfaState->tokenPriority;
       }
       dfa.acceptStates.insert(dfaStartState);
     }
+  }
+
+  if (bestTokenType) {
+    dfaStartState->tokenType = bestTokenType;
+    std::cout << "Setting token type for start DFA state " << dfaStartState->id
+              << ": " << *bestTokenType << std::endl;
   }
 
   std::queue<std::set<NFAState *>> workQueue;
@@ -111,17 +120,25 @@ DFA SubsetConstruction::convert()
         workQueue.push(nextStates);
 
         // Check for accept states and token types in the next states
+        int bestPriority = INT_MAX;
+        std::optional<std::string> bestTokenType = std::nullopt;
+
         for (NFAState *nfaState : nextStates) {
           if (nfaState->isAccept) {
             nextDFAState->isAccept = true;
-            if (nfaState->tokenType) {
-              nextDFAState->tokenType = nfaState->tokenType;
-              std::cout << "Setting token type for DFA state "
-                        << nextDFAState->id << ": " << *nfaState->tokenType
-                        << std::endl;
+            if (nfaState->tokenType && nfaState->tokenPriority < bestPriority) {
+              // nextDFAState->tokenType = nfaState->tokenType;
+              bestTokenType = nfaState->tokenType;
+              bestPriority = nfaState->tokenPriority;
             }
             dfa.acceptStates.insert(nextDFAState);
           }
+        }
+
+        if (bestTokenType) {
+          nextDFAState->tokenType = bestTokenType;
+          std::cout << "Setting token type for DFA state " << nextDFAState->id
+                    << ": " << *bestTokenType << std::endl;
         }
       } else {
         nextDFAState = stateMapping[nextStates];
@@ -286,6 +303,7 @@ TransitionTable TransitionTableGenerator::generate()
     if (fragment.accept) {
       fragment.accept->isAccept = false;
       fragment.accept->tokenType = pattern.tokenType;
+      fragment.accept->tokenPriority = pattern.priority;
       std::cout << "Set fragment accept state ID " << fragment.accept->id
                 << " token type to " << pattern.tokenType << std::endl;
     }

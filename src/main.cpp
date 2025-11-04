@@ -53,101 +53,108 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  std::cout << "Starting Lexer Engine Test..." << std::endl;
   std::vector<RegexPattern> patterns = {
-    // keywords first to ensure they are matched before identifiers
-    RegexPattern("if", "IF_TOK"),
-    RegexPattern("else", "ELSE_TOK"),
-    RegexPattern("elif", "ELIF_TOK"),
-    RegexPattern("for", "FOR_TOK"),
-    RegexPattern("while", "WHILE_TOK"),
-    RegexPattern("break", "BREAK_TOK"),
-    RegexPattern("continue", "CONTINUE_TOK"),
-    RegexPattern("return", "RETURN_TOK"),
-    RegexPattern("func", "FUNC_TOK"),
-    RegexPattern("import", "IMPORT_TOK"),
-    RegexPattern("from", "FROM_TOK"),
-    RegexPattern("as", "AS_TOK"),
-    RegexPattern("print", "PRINT_TOK"),
-    RegexPattern("in", "IN_TOK"),
-    RegexPattern("use", "USE_TOK"),
-    RegexPattern("with", "WITH_TOK"),
-    RegexPattern("numpy", "NUMPY_TOK"),
-    // reserved words data types
-    RegexPattern("int", "INT_TOK"),
-    RegexPattern("float", "FLOAT_TOK"),
-    RegexPattern("bool", "BOOL_TOK"),
-    RegexPattern("char", "CHAR_TOK"),
-    RegexPattern("string", "STRING_TOK"),
-    RegexPattern("tensor", "TENSOR_TOK"),
-    RegexPattern("matrix", "MATRIX_TOK"),
-    RegexPattern("array", "ARRAY_TOK"),
-    RegexPattern("void", "VOID_TOK"),
-    // reserved words math functions
-    RegexPattern("rand", "RAND_TOK"),
-    RegexPattern("zeros", "ZEROS_TOK"),
-    RegexPattern("ones", "ONES_TOK"),
-    RegexPattern("mean", "MEAN_TOK"),
-    RegexPattern("sum", "SUM_TOK"),
-    RegexPattern("dot", "DOT_TOK"),
-    RegexPattern("max", "MAX_TOK"),
-    RegexPattern("min", "MIN_TOK"),
-    RegexPattern("std", "STD_TOK"),
-    RegexPattern("var", "VAR_TOK"),
-    // reserved words data handling
-    RegexPattern("to_array", "TOARRAY_TOK"),
-    RegexPattern("read_csv", "READCSV_TOK"),
-    RegexPattern("to_tensor", "TOTENSOR_TOK"),
-    // reserved words statistical operations
-    RegexPattern("normalize", "NORMALIZE_TOK"),
-    RegexPattern("flatten", "FLATTEN_TOK"),
-    RegexPattern("concat", "CONCAT_TOK"),
-    RegexPattern("slice", "SLICE_TOK"),
-    RegexPattern("sort", "SORT_TOK"),
-    RegexPattern("filter", "FILTER_TOK"),
-    // noise words
-    RegexPattern("then", "THEN"),
-    RegexPattern("end", "END"),
-    RegexPattern("do", "DO"),
-    // general patterns
-    RegexPattern("#[^\n]*", "COMMENT"),
-    RegexPattern("\\\"\\\"\\\"[\\s\\S]*\\\"\\\"\\\"", "MULTILINE_STRING"),
-    RegexPattern("\\\"[^\\\"\\n]*\\\"", "STRING_LITERAL"),
-    RegexPattern("\\'[^\\'\\n]\\'", "CHAR_LITERAL"),
-    RegexPattern("\\d+", "INT_LITERAL"),
-    RegexPattern("\\s+", "WHITESPACE"),
-    RegexPattern("\\d+\\.\\d+", "FLOAT_LITERAL"),
-    // arithmetic operations
-    RegexPattern("\\+", "PLUS"),
-    RegexPattern("\\*", "STAR"),
-    RegexPattern("\\*\\*", "POWER"),
-    RegexPattern("-", "MINUS"),
-    RegexPattern("/", "SLASH"),
-    // assignment and comparison
-    RegexPattern("==", "EQUAL"),
-    RegexPattern("=", "ASSIGN"),
-    RegexPattern("%", "MODULO"),
-    RegexPattern("<=", "LESS_EQUAL"),
-    RegexPattern("<", "LESS_THAN"),
-    RegexPattern(">=", "GREATER_EQUAL"),
-    RegexPattern(">", "GREATER_THAN"),
-    RegexPattern("!=", "NOT_EQUAL"),
-    // logical operations
-    RegexPattern("and", "AND"),
-    RegexPattern("or", "OR"),
-    RegexPattern("not", "NOT"),
-    // delimiters
-    RegexPattern("\\(", "LEFT_PARENTHESIS"),
-    RegexPattern("\\)", "RIGHT_PARENTHESIS"),
-    RegexPattern("\\[", "LEFT_SQUARE_BRACKET"),
-    RegexPattern("\\]", "RIGHT_SQUARE_BRACKET"),
-    RegexPattern("\\{", "LEFT_CURLY_BRACE"),
-    RegexPattern("\\}", "RIGHT_CURLY_BRACE"),
-    RegexPattern(",", "COMMA"),
-    RegexPattern(":", "COLON"),
-    RegexPattern(";", "SEMI_COLON"),
-    // identifers (last to ensure keywords are matched first)
-    RegexPattern("[a-zA-Z][a-zA-Z0-9_]*", "IDENTIFIER"),
+    // Keywords (0-19)
+    RegexPattern("if", "IF_TOK", 0),
+    RegexPattern("else", "ELSE_TOK", 1),
+    RegexPattern("elif", "ELIF_TOK", 2),
+    RegexPattern("for", "FOR_TOK", 3),
+    RegexPattern("while", "WHILE_TOK", 4),
+    RegexPattern("break", "BREAK_TOK", 5),
+    RegexPattern("continue", "CONTINUE_TOK", 6),
+    RegexPattern("return", "RETURN_TOK", 7),
+    RegexPattern("func", "FUNC_TOK", 8),
+    RegexPattern("import", "IMPORT_TOK", 9),
+    RegexPattern("from", "FROM_TOK", 10),
+    RegexPattern("as", "AS_TOK", 11),
+    RegexPattern("print", "PRINT_TOK", 12),
+    RegexPattern("in", "IN_TOK", 13),
+    RegexPattern("use", "USE_TOK", 14),
+    RegexPattern("with", "WITH_TOK", 15),
+    RegexPattern("numpy", "NUMPY_TOK", 16),
+    RegexPattern("then", "THEN", 17),
+    RegexPattern("end", "END", 18),
+    RegexPattern("do", "DO", 19),
+
+    // Data types (20-29)
+    RegexPattern("int", "INT_TOK", 20),
+    RegexPattern("float", "FLOAT_TOK", 21),
+    RegexPattern("bool", "BOOL_TOK", 22),
+    RegexPattern("char", "CHAR_TOK", 23),
+    RegexPattern("string", "STRING_TOK", 24),
+    RegexPattern("tensor", "TENSOR_TOK", 25),
+    RegexPattern("matrix", "MATRIX_TOK", 26),
+    RegexPattern("array", "ARRAY_TOK", 27),
+    RegexPattern("void", "VOID_TOK", 28),
+
+    // Math functions (30-49)
+    RegexPattern("rand", "RAND_TOK", 30),
+    RegexPattern("zeros", "ZEROS_TOK", 31),
+    RegexPattern("ones", "ONES_TOK", 32),
+    RegexPattern("mean", "MEAN_TOK", 33),
+    RegexPattern("sum", "SUM_TOK", 34),
+    RegexPattern("dot", "DOT_TOK", 35),
+    RegexPattern("max", "MAX_TOK", 36),
+    RegexPattern("min", "MIN_TOK", 37),
+    RegexPattern("std", "STD_TOK", 38),
+    RegexPattern("var", "VAR_TOK", 39),
+
+    // Data handling functions (50-69)
+    RegexPattern("to_array", "TOARRAY_TOK", 50),
+    RegexPattern("read_csv", "READCSV_TOK", 51),
+    RegexPattern("to_tensor", "TOTENSOR_TOK", 52),
+    RegexPattern("normalize", "NORMALIZE_TOK", 53),
+    RegexPattern("flatten", "FLATTEN_TOK", 54),
+    RegexPattern("concat", "CONCAT_TOK", 55),
+    RegexPattern("slice", "SLICE_TOK", 56),
+    RegexPattern("sort", "SORT_TOK", 57),
+    RegexPattern("filter", "FILTER_TOK", 58),
+
+    // Multi-character operators (70-89)
+    RegexPattern("\\*\\*", "POWER", 70),
+    RegexPattern("==", "EQUAL", 71),
+    RegexPattern("<=", "LESS_EQUAL", 72),
+    RegexPattern(">=", "GREATER_EQUAL", 73),
+    RegexPattern("!=", "NOT_EQUAL", 74),
+    RegexPattern("and", "AND", 75),
+    RegexPattern("or", "OR", 76),
+    RegexPattern("not", "NOT", 77),
+
+    // Single-character operators (90-109)
+    RegexPattern("\\+", "PLUS", 90),
+    RegexPattern("\\*", "STAR", 91),
+    RegexPattern("-", "MINUS", 92),
+    RegexPattern("/", "SLASH", 93),
+    RegexPattern("=", "ASSIGN", 94),
+    RegexPattern("%", "MODULO", 95),
+    RegexPattern("<", "LESS_THAN", 96),
+    RegexPattern(">", "GREATER_THAN", 97),
+
+    // Delimiters (110-129)
+    RegexPattern("\\(", "LEFT_PARENTHESIS", 110),
+    RegexPattern("\\)", "RIGHT_PARENTHESIS", 111),
+    RegexPattern("\\[", "LEFT_SQUARE_BRACKET", 112),
+    RegexPattern("\\]", "RIGHT_SQUARE_BRACKET", 113),
+    RegexPattern("\\{", "LEFT_CURLY_BRACE", 114),
+    RegexPattern("\\}", "RIGHT_CURLY_BRACE", 115),
+    RegexPattern(",", "COMMA", 116),
+    RegexPattern(":", "COLON", 117),
+    RegexPattern(";", "SEMI_COLON", 118),
+
+    // Literals (130-149)
+    RegexPattern("\\\"\\\"\\\"[\\s\\S]*\\\"\\\"\\\"", "MULTILINE_STRING", 130),
+    RegexPattern("\\\"[^\\\"\\n]*\\\"", "STRING_LITERAL", 131),
+    RegexPattern("\\'[^\\'\\n]\\'", "CHAR_LITERAL", 132),
+    RegexPattern("\\d+\\.\\d+", "FLOAT_LITERAL", 133),
+    RegexPattern("\\d+", "INT_LITERAL", 134),
+    RegexPattern("true|false", "BOOL_LITERAL", 135),
+
+    // Comments and whitespace (150-159)
+    RegexPattern("#[^\n]*", "COMMENT", 150),
+    RegexPattern("\\s+", "WHITESPACE", 151),
+
+    // Identifier must be last
+    RegexPattern("[a-zA-Z][a-zA-Z0-9_]*", "IDENTIFIER", INT_MAX)
   };
 
   TransitionTableGenerator tableGenerator(patterns);

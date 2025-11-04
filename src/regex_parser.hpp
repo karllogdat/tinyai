@@ -9,9 +9,10 @@
 struct RegexPattern {
   std::string pattern;
   std::string tokenType; // for lexer use
+  int priority; // lower value = higher priority
 
-  RegexPattern(const std::string &p, const std::string &tt)
-      : pattern(p), tokenType(tt)
+  RegexPattern(const std::string &p, const std::string &tt, int prio = 0)
+      : pattern(p), tokenType(tt), priority(prio)
   {
   }
 };

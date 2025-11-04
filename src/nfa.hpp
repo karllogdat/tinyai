@@ -12,6 +12,7 @@ public:
   int id;
   bool isAccept;
   std::optional<std::string> tokenType; // for lexer use
+  int tokenPriority = INT_MAX; // lower = higher priority
 
   NFAState(int id) : id(id), isAccept(false) {}
 };
