@@ -14,6 +14,8 @@ bool NFATransition::matches(char c) const
 NFAState *NFA::createState()
 {
   auto state = std::make_unique<NFAState>(nextStateId++);
+  state->tokenType = std::nullopt;
+  state->tokenPriority = INT_MAX;
   NFAState *ptr = state.get();
   states.push_back(std::move(state));
   return ptr;

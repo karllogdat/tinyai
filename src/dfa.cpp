@@ -259,7 +259,7 @@ TransitionTable TransitionTableGenerator::generate()
   NFAState *globalAccept = combinedNFA.createState();
   combinedNFA.startState = globalStart;
   combinedNFA.acceptState = globalAccept;
-  globalAccept->isAccept = true;
+  globalAccept->isAccept = false;
 
   for (const auto &pattern : patterns) {
     std::cout << "Processing pattern: " << pattern.pattern << std::endl;
@@ -301,7 +301,7 @@ TransitionTable TransitionTableGenerator::generate()
 
     // Ensure fragment's accept is not left marked as final
     if (fragment.accept) {
-      fragment.accept->isAccept = false;
+      fragment.accept->isAccept = true;
       fragment.accept->tokenType = pattern.tokenType;
       fragment.accept->tokenPriority = pattern.priority;
       std::cout << "Set fragment accept state ID " << fragment.accept->id
