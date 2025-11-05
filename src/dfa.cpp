@@ -490,5 +490,6 @@ void TransitionTableGenerator::generateToFile(const std::string &filename)
   }
   outFile << " };\n";
 
+  headerFile.close();
   outFile.close();
 }

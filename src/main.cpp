@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     RegexPattern("filter", "FILTER_TOK", 58),
 
     // Multi-character operators (70-89)
-    RegexPattern("\\*\\*", "POWER", 70),
+    RegexPattern("\\*\\*", "DOUBLE_ASTERISK", 70),
     RegexPattern("==", "EQUAL", 71),
     RegexPattern("<=", "LESS_EQUAL", 72),
     RegexPattern(">=", "GREATER_EQUAL", 73),
@@ -119,10 +119,11 @@ int main(int argc, char *argv[])
     RegexPattern("and", "AND", 75),
     RegexPattern("or", "OR", 76),
     RegexPattern("not", "NOT", 77),
+    RegexPattern("//", "DOUBLE_SLASH", 78),
 
     // Single-character operators (90-109)
     RegexPattern("\\+", "PLUS", 90),
-    RegexPattern("\\*", "STAR", 91),
+    RegexPattern("\\*", "ASTERISK", 91),
     RegexPattern("-", "MINUS", 92),
     RegexPattern("/", "SLASH", 93),
     RegexPattern("=", "ASSIGN", 94),
@@ -142,7 +143,7 @@ int main(int argc, char *argv[])
     RegexPattern(";", "SEMI_COLON", 118),
 
     // Literals (130-149)
-    RegexPattern("\\\"\\\"\\\"[\\s\\S]*\\\"\\\"\\\"", "MULTILINE_STRING", 130),
+    RegexPattern("\\\"\\\"\\\"[\\s\\S]*\\\"\\\"\\\"", "MULTILINE_COMMENT", 130),
     RegexPattern("\\\"[^\\\"\\n]*\\\"", "STRING_LITERAL", 131),
     RegexPattern("\\'[^\\'\\n]\\'", "CHAR_LITERAL", 132),
     RegexPattern("\\d+\\.\\d+", "FLOAT_LITERAL", 133),
@@ -163,7 +164,7 @@ int main(int argc, char *argv[])
 
   TableDrivenLexer lexer(table);
   std::string input = readFileToString(inputFile);
-  lexer.lex(input);
+  lexer.createSymbolTable(input, "symbol_table.txt");
 
   return 0;
 }
