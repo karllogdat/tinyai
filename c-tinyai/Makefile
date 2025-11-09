@@ -1,7 +1,7 @@
 # Makefile
 
 CXX = gcc
-CXXFLAGS = -I./src
+CXXFLAGS = -Wall -Wextra -Wshadow -I./src
 SRC = src/main.c src/lexer.c src/transition_table.c
 OBJ = $(SRC:.c=.o)
 TARGET = lexer
