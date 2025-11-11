@@ -1,75 +1,51 @@
-# Table Driven Lexer
+# TinyAI
 
-This project implements a table-driven lexer that combines multiple regular expressions (regex) into a single epsilon-NFA (e-NFA), converts it to a deterministic finite automaton (DFA), and tests the matching functionality against various input strings.
+A programming language implementation with lexical analysis capabilities. This repository contains two implementations of TinyAI: one in C and one in C++.
 
-## Project Structure
+## Overview
 
-- **src/**: Contains the source code files.
-  - **main.cpp**: Entry point of the application.
-  - **regex_parser.hpp**: Header file for the regex lexer and parser.
-  - **regex_parser.cpp**: Implementation of the regex lexer and parser.
-  - **nfa.hpp**: Header file for the NFA representation.
-  - **nfa.cpp**: Implementation of the NFA functionality.
-  - **dfa.hpp**: Header file for the DFA representation.
-  - **dfa.cpp**: Implementation of the DFA functionality.
-  - **lexer.hpp**: Header file for lexical analyzer.
-  - **lexer.cpp**: Implementation file for lexical analyzer.
+TinyAI is a compiler/interpreter project that implements lexical analysis using finite automata theory. Both implementations use a table-driven lexer approach that combines multiple regular expressions into a single epsilon-NFA (e-NFA), converts it to a deterministic finite automaton (DFA), and performs lexical analysis on input files.
 
-- **CMakeLists.txt**: Main configuration file for building the project using CMake.
+## Implementations
 
-- **Makefile**: Defines build commands for the project.
+### C Implementation (`c/`)
 
-## Building the Project
+A C implementation of the TinyAI lexer featuring a transition table-driven approach for lexical analysis.
 
-To build the project, you can use either CMake or Make.
-
-### Using CMake
-
-1. Create a build directory:
-
-   ```shell
-   mkdir build
-   cd build
-   ```
-
-2. Run CMake to configure the project:
-
-   ```shell
-   cmake ..
-   ```
-
-3. Build the project:
-
-   ```shell
-   make
-   ```
-
-### Using Make
-
-Simply run:
+**Building:**
 
 ```shell
+cd c
 make
 ```
 
-## Running the Application
+### C++ Implementation (`cpp/`)
 
-After building the project, you can run the application by executing the compiled binary. The application will combine the specified regex patterns into a single e-NFA, convert it to a DFA, and test various input strings for matches.
+A more feature-rich C++ implementation with comprehensive NFA and DFA abstractions. For detailed information about building and running the C++ version, see [cpp/README.md](cpp/README.md).
 
-```shell
-.\lexer.exe .\test.ai
-```
-
-Alternatively, follow the following format if lexing other `.ai` files.
+**Building:**
 
 ```shell
-.\lexer <input-file>
+cd cpp
+make
 ```
 
-## Contributing
+**Running:**
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any enhancements or bug fixes.
+```shell
+./lexer <input-file>.ai
+```
 
-## License
+## Key Features
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+- **Lexical Analysis**: Table-driven lexer for tokenizing TinyAI source code
+- **Finite Automata**: NFA to DFA conversion for pattern matching
+- **Regular Expression Support**: Parse and compile regex patterns
+- **Multi-implementation**: Both C and C++ versions available
+
+## Getting Started
+
+1. Choose your preferred implementation (C or C++)
+2. Navigate to the respective directory
+3. Build using Make or CMake (C++ only)
+4. Run the lexer on your TinyAI source files

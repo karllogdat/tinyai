@@ -1,11 +1,10 @@
-./lexer.exe
-./src/*.o
+./c/*.exe
+./c/src/*.o
 
+./cpp/*.exe
+./cpp/src/*.o
+
+
+./symbol_table.txt
 ./transition_table.h
 ./transition_table.c
-./symbol_table.txt
-
-./c-tinyai/src/*.o
-./c-tinyai/lexer.exe
-./c-tinyai/symbol_table.txt
-./c-tinyai/test.ai
