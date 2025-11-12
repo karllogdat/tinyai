@@ -4,23 +4,22 @@
 #include <stdlib.h>
 #include "transition_table.h"
 
-struct Token
-{
-    TokenType type;
-    char *lexeme;
+struct Token {
+        TokenType type;
+        char *lexeme;
 
-    int line;
-    int col;
+        int line;
+        int col;
 };
 
-struct Token *token_create(TokenType type, const char *lexeme, int line, int col);
+struct Token *
+token_create(TokenType type, const char *lexeme, int line, int col);
 void token_destroy(struct Token *token);
 
-struct TokenList
-{
-    struct Token **tokens;
-    size_t size;
-    size_t capacity;
+struct TokenList {
+        struct Token **tokens;
+        size_t size;
+        size_t capacity;
 };
 
 struct TokenList *token_list_create();

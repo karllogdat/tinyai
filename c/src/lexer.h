@@ -4,13 +4,12 @@
 #include "token.h"
 #include "transition_table.h"
 
-struct Lexer
-{
-    struct TokenList *tokens;
-    char *source_code;
-    size_t position;
+struct Lexer {
+        struct TokenList *tokens;
+        char *source_code;
+        size_t position;
 
-    FILE *symbol_table_file;
+        FILE *symbol_table_file;
 };
 
 void lexer_init(struct Lexer *lexer, char *source);
