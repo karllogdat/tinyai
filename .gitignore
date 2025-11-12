@@ -8,3 +8,5 @@
 ./symbol_table.txt
 ./transition_table.h
 ./transition_table.c
+
+./c/all_tokens.ai

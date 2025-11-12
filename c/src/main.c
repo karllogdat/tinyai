@@ -68,5 +68,6 @@ int main(int argc, char **argv)
 
     struct Lexer lexer;
     lexer_init(&lexer, src_code);
-    lex(&lexer);
+    lexer_lex(&lexer);
+    lexer_print_toks(&lexer);
 }

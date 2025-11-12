@@ -1,6 +1,8 @@
 #ifndef TRANSITION_TABLE_H
 #define TRANSITION_TABLE_H
 
+#include <limits.h>
+
 #define STATE_COUNT 420
 #define SYMBOL_COUNT 128
 
@@ -12,7 +14,8 @@ extern const int TRANSITION_TABLE[STATE_COUNT][SYMBOL_COUNT];
 
 extern const int ACCEPT_STATE_IDS[STATE_COUNT];
 
-typedef enum {
+typedef enum
+{
   AND = 35,
   ARRAY_TOK = 61,
   ASSIGN = 14,
@@ -96,6 +99,7 @@ typedef enum {
   WHITESPACE = 0,
   WITH_TOK = 60,
   ZEROS_TOK = 68,
+  UNKNOWN = INT_MAX,
   TOKEN_TYPE_COUNT = 83
 } TokenType;
 
