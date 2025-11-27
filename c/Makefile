@@ -2,7 +2,7 @@
 
 CXX = gcc
 CXXFLAGS = -Wall -Wextra -Wshadow -I./src
-SRC = src/main.c src/lexer.c src/transition_table.c src/token.c
+SRC = src/main.c src/lexer.c src/transition_table.c src/token.c src/ast_node.c
 OBJ = $(SRC:.c=.o)
 TARGET = lexer
 
