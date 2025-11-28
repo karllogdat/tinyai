@@ -46,6 +46,6 @@ BinPackParameters: false
 
 # Misc
 Cpp11BracedListStyle: false
-IndentCaseLabels: true
+IndentCaseLabels: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 SortIncludes: false

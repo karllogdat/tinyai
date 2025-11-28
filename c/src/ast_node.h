@@ -164,9 +164,13 @@ struct ASTNode {
                 IdentNode *ident;
                 FuncCallNode *func_call;
         } data;
+
+        size_t line;
+        size_t col;
 };
 
 ASTNode *node_program_create(StmtListNode *stmt_list);
+ASTNode *node_stmt_block_create(StmtListNode *stmts);
 ASTNode *node_decl_create(DataType type, char *ident, ASTNode *init);
 ASTNode *node_assign_create(char *ident, ASTNode *expr);
 // handle input assign creation on separate function
