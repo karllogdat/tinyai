@@ -535,7 +535,7 @@ ArgNode *arg_node_create(ASTNode *expr, ArgNode *next)
 
 /* memory management */
 
-static void elif_list_free(ElifNode *elif)
+void elif_list_free(ElifNode *elif)
 {
         while (elif) {
                 ElifNode *next = elif->next;
@@ -546,7 +546,7 @@ static void elif_list_free(ElifNode *elif)
         }
 }
 
-static void arg_list_free(ArgNode *arg)
+void arg_list_free(ArgNode *arg)
 {
         while (arg) {
                 ArgNode *next = arg->next;

@@ -194,6 +194,8 @@ ASTNode *node_func_call_create(char *func_name, ArgNode *args);
 ElifNode *elif_node_create(ASTNode *cond, ASTNode *stmt, ElifNode *next);
 ArgNode *arg_node_create(ASTNode *expr, ArgNode *next);
 
+void elif_list_free(ElifNode *elif);
+void arg_list_free(ArgNode *arg);
 void ast_node_free(ASTNode *node);
 
 #endif

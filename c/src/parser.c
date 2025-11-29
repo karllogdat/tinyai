@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "ast_node.h"
 #include "token.h"
 
 /* parser lifetime handling */
@@ -284,5 +285,122 @@ static ASTNode *parse_assign(Parser *p)
                 return NULL;
         }
 
-        // if (match(p, ))
+        if (match(p, INPUT_TOK)) {
+                if (!consume(p, LEFT_PARENTHESIS, "expected ')' after 'input'"))
+                        return NULL;
+
+                struct Token *prompt_tok =
+                    consume(p,
+                            STRING_LITERAL,
+                            "expected string literal for input prompt");
+                if (!prompt_tok)
+                        return NULL;
+
+                if (!consume(p,
+                             RIGHT_PARENTHESIS,
+                             "expected ')' after input prompt"))
+                        return NULL;
+
+                return node_input_assign_create(ident_tok->lexeme,
+                                                prompt_tok->lexeme);
+        }
+
+        ASTNode *expr = parse_expr(p);
+        if (!expr)
+                return NULL;
+
+        return node_assign_create(ident_tok->lexeme, expr);
+}
+
+static ASTNode *parse_if_stmt(Parser *p)
+{
+        if (!consume(p, LEFT_PARENTHESIS, "expected '(' after 'if'")) {
+                return NULL;
+        }
+
+        ASTNode *cond = parse_expr(p);
+        if (!cond) {
+                return NULL;
+        }
+
+        if (!consume(p, RIGHT_PARENTHESIS, "expected ')' after if condition")) {
+                ast_node_free(cond);
+                return NULL;
+        }
+
+        ASTNode *if_body = parse_stmt(p);
+        if (!if_body) {
+                ast_node_free(cond);
+                return NULL;
+        }
+
+        // used if has succeeding elif tokens
+        ElifNode *elif_list = NULL;
+        ElifNode *elif_tail = NULL;
+        while (match(p, ELIF_TOK)) {
+                if (!consume(
+                        p, LEFT_PARENTHESIS, "expected '(' after 'elif'")) {
+                        ast_node_free(cond);
+                        ast_node_free(if_body);
+                        elif_list_free(elif_list);
+                        return NULL;
+                }
+
+                ASTNode *elif_cond = parse_expr(p);
+                if (!elif_cond) {
+                        ast_node_free(cond);
+                        ast_node_free(if_body);
+                        elif_list_free(elif_list);
+                        return NULL;
+                }
+
+                if (!consume(
+                        p, RIGHT_PARENTHESIS, "expected ')' after 'elif'")) {
+                        ast_node_free(cond);
+                        ast_node_free(if_body);
+                        elif_list_free(elif_list);
+                        return NULL;
+                }
+
+                ASTNode *elif_body = parse_stmt(p);
+                if (!elif_body) {
+                        ast_node_free(cond);
+                        ast_node_free(if_body);
+                        ast_node_free(elif_cond);
+                        elif_list_free(elif_list);
+                        return NULL;
+                }
+
+                ElifNode *new_elif =
+                    elif_node_create(elif_cond, elif_body, NULL);
+                if (!new_elif) {
+                        ast_node_free(cond);
+                        ast_node_free(if_body);
+                        ast_node_free(elif_cond);
+                        ast_node_free(elif_body);
+                        elif_list_free(elif_list);
+                        return NULL;
+                }
+
+                if (!elif_list) {
+                        elif_list = new_elif;
+                        elif_tail = new_elif;
+                } else {
+                        elif_tail->next = new_elif;
+                        elif_tail = new_elif;
+                }
+        }
+
+        ASTNode *else_body = NULL;
+        if (match(p, ELSE_TOK)) {
+                else_body = parse_stmt(p);
+                if (!else_body) {
+                        ast_node_free(cond);
+                        ast_node_free(if_body);
+                        elif_list_free(elif_list);
+                        return NULL;
+                }
+        }
+
+        return node_if_create(cond, if_body, elif_list, else_body);
 }
