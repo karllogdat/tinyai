@@ -1,0 +1,124 @@
+
+Minimal BNF grammar for tinyai.
+
+- declaration
+- assignment
+- if (elif, else) statements
+- while loops
+- for loops
+- output using print
+- input using input
+
+====================================================================================
+
+
+<program> ::= <stmt-list>
+
+
+<stmt-list> ::= e
+	        | <stmt> <stmt-list>
+
+
+<stmt> ::= <decl> ";"
+	   | <expr> ";"
+	   | <assign> ";"
+	   | <if-stmt>
+	   | <while-stmt>
+	   | <for-stmt>
+ 	   | <stmt-block>
+	   | "print" "(" <expr> ")" ";"
+	   | ";"
+
+
+<stmt-block> ::= "{" <stmt-list>? "}"
+
+
+<decl> ::= <type> <ident>
+	   | <type> <ident> "=" <expr>
+
+
+<type> ::= "int"
+	   | "float"
+	   | "bool"
+	   | "char"
+	   | "string"
+
+
+<assign> ::= <ident> "=" <expr>
+	     | <ident> "=" "input" "(" STRING_LIT_TOKEN ")"
+
+
+/* CONTROL STATEMENTS */
+<if-stmt> ::= "if" "(" <expr> ")" <stmt>
+		 ("elif" "(" <expr> ")" <stmt>)*
+		 ["else" <stmt>]
+
+
+<while-stmt> ::= "while" "(" <expr> ")" <stmt>
+
+
+<for-stmt> ::= "for" "(" <for-init> ";" <expr> ";" <for-iter> ")" <stmt>
+<for-init> ::= <decl>
+		| <assign>
+		| e
+<for-iter> ::= <assign>
+		| <expr>
+		| e
+
+
+/* EXPRESSIONS */
+/* e represents the empty string */
+<expr> ::= <lor-expr>
+
+<lor-expr> ::= <lor-expr> "or" <land-expr>
+             | <land-expr>
+
+<land-expr> ::= <land-expr> "and' <eq-expr>
+              | <eq-expr>
+
+<eq-expr> ::= <eq-expr> "==" <rel-expr>
+            | <eq-expr> "!=" <rel-expr>
+            | <rel-expr>
+
+<rel-expr> ::= <rel-expr> "<" <add-expr>
+             | <rel-expr> ">" <add-expr>
+             | <rel-expr> "<=" <add-expr>
+             | <rel-expr> ">=" <add-expr>
+             | <add-expr>
+
+<add-expr> ::= <add-expr> "+" <mult-expr>
+             | <add-expr> "-" <mult-expr>
+             | <mult-expr>
+
+<mult-expr> ::= <mult-expr> "*" <pow-expr>
+              | <mult-expr> "/" <pow-expr>
+              | <mult-expr> "%" <pow-expr>
+              | <mult-expr> "//" <pow-expr>
+
+<pow-expr> ::= <unary-expr> "**" <pow-expr>
+             | <unary-expr>
+
+
+<unary-expr> ::= "not" <unary-expr>
+		  | "-" <unary-expr>
+		  | <primary-expr>
+
+<arg-list> ::= <expr> "," <arg-list>
+             | <expr>
+
+<primary-expr> ::= <ident> <func-tail>?
+		    | <literal>
+		    | "(" <expr> ")"
+
+
+<func-tail> ::= "(" <arg-list>? ")"
+
+
+<literal> ::= INT_LIT_TOKEN
+	      | FLOAT_LIT_TOKEN
+	      | BOOL_LIT_TOKEN
+	      | CHAR_LIT_TOKEN
+	      | STRING_LIT_TOKEN
+
+
+<ident> ::= IDENT_TOKEN
