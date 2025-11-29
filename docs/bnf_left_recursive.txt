@@ -16,42 +16,42 @@ Minimal BNF grammar for tinyai.
 
 
 <stmt-list> ::= e
-	        | <stmt> <stmt-list>
+	          | <stmt> <stmt-list>
 
 
 <stmt> ::= <decl> ";"
-	   | <expr> ";"
-	   | <assign> ";"
-	   | <if-stmt>
-	   | <while-stmt>
-	   | <for-stmt>
- 	   | <stmt-block>
-	   | "print" "(" <expr> ")" ";"
-	   | ";"
+	     | <expr> ";"
+	     | <assign> ";"
+	     | <if-stmt>
+	     | <while-stmt>
+	     | <for-stmt>
+ 	     | <stmt-block>
+	     | "print" "(" <expr> ")" ";"
+	     | ";"
 
 
 <stmt-block> ::= "{" <stmt-list>? "}"
 
 
 <decl> ::= <type> <ident>
-	   | <type> <ident> "=" <expr>
+	     | <type> <ident> "=" <expr>
 
 
 <type> ::= "int"
-	   | "float"
-	   | "bool"
-	   | "char"
-	   | "string"
+	     | "float"
+	     | "bool"
+	     | "char"
+	     | "string"
 
 
 <assign> ::= <ident> "=" <expr>
-	     | <ident> "=" "input" "(" STRING_LIT_TOKEN ")"
+	       | <ident> "=" "input" "(" STRING_LIT_TOKEN ")"
 
 
 /* CONTROL STATEMENTS */
 <if-stmt> ::= "if" "(" <expr> ")" <stmt>
-		 ("elif" "(" <expr> ")" <stmt>)*
-		 ["else" <stmt>]
+		      ("elif" "(" <expr> ")" <stmt>)*
+		      ["else" <stmt>]
 
 
 <while-stmt> ::= "while" "(" <expr> ")" <stmt>
@@ -59,11 +59,11 @@ Minimal BNF grammar for tinyai.
 
 <for-stmt> ::= "for" "(" <for-init> ";" <expr> ";" <for-iter> ")" <stmt>
 <for-init> ::= <decl>
-		| <assign>
-		| e
+		     | <assign>
+		     | e
 <for-iter> ::= <assign>
-		| <expr>
-		| e
+		     | <expr>
+		     | e
 
 
 /* EXPRESSIONS */
@@ -100,25 +100,25 @@ Minimal BNF grammar for tinyai.
 
 
 <unary-expr> ::= "not" <unary-expr>
-		  | "-" <unary-expr>
-		  | <primary-expr>
+		       | "-" <unary-expr>
+		       | <primary-expr>
 
 <arg-list> ::= <expr> "," <arg-list>
              | <expr>
 
 <primary-expr> ::= <ident> <func-tail>?
-		    | <literal>
-		    | "(" <expr> ")"
+		         | <literal>
+		         | "(" <expr> ")"
 
 
 <func-tail> ::= "(" <arg-list>? ")"
 
 
 <literal> ::= INT_LIT_TOKEN
-	      | FLOAT_LIT_TOKEN
-	      | BOOL_LIT_TOKEN
-	      | CHAR_LIT_TOKEN
-	      | STRING_LIT_TOKEN
+	        | FLOAT_LIT_TOKEN
+	        | BOOL_LIT_TOKEN
+	        | CHAR_LIT_TOKEN
+	        | STRING_LIT_TOKEN
 
 
 <ident> ::= IDENT_TOKEN
