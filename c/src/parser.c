@@ -404,3 +404,467 @@ static ASTNode *parse_if_stmt(Parser *p)
 
         return node_if_create(cond, if_body, elif_list, else_body);
 }
+
+static ASTNode *parse_while(Parser *p)
+{
+        if (!consume(p, LEFT_PARENTHESIS, "expected '(' after 'while'")) {
+                return NULL;
+        }
+
+        ASTNode *cond = parse_expr(p);
+        if (!cond) {
+                return NULL;
+        }
+
+        if (!consume(
+                p, RIGHT_PARENTHESIS, "expected ')' after while condition")) {
+                ast_node_free(cond);
+                return NULL;
+        }
+
+        ASTNode *body = parse_stmt(p);
+        if (!body) {
+                ast_node_free(cond);
+                return NULL;
+        }
+
+        return node_while_create(cond, body);
+}
+
+static ASTNode *parse_for(Parser *p)
+{
+        if (!consume(p, LEFT_PARENTHESIS, "expected '(' after 'for'")) {
+                return NULL;
+        }
+
+        ASTNode *init = NULL;
+        if (match(p, SEMI_COLON)) {
+                init = NULL; // no initializer stmt
+        } else if (check(p, INT_TOK) || check(p, FLOAT_TOK) ||
+                   check(p, BOOL_TOK) || check(p, CHAR_TOK) ||
+                   check(p, STRING_TOK)) {
+                init = parse_decl(p);
+                if (!init)
+                        return NULL;
+                if (!consume(
+                        p, SEMI_COLON, "expected ';' after for initializer")) {
+                        ast_node_free(init);
+                        return NULL;
+                }
+        } else {
+                // if not empty and not starting with keyword => assume
+                // assignment
+                struct Token *ident = advance(p);
+                init = parse_assign(p);
+                if (!init)
+                        return NULL;
+                if (!consume(
+                        p, SEMI_COLON, "expected ';' after for initializer")) {
+                        ast_node_free(init);
+                        return NULL;
+                }
+        }
+
+        ASTNode *cond = NULL;
+        if (!check(p, SEMI_COLON)) {
+                cond = parse_expr(p);
+                if (!cond) {
+                        ast_node_free(init);
+                        return NULL;
+                }
+        }
+
+        if (!consume(p, SEMI_COLON, "expected ';' after for condition")) {
+                ast_node_free(init);
+                ast_node_free(cond);
+                return NULL;
+        }
+
+        ASTNode *iter = NULL;
+        if (!check(p, RIGHT_PARENTHESIS)) {
+                if (check(p, IDENTIFIER)) {
+                        struct Token *next =
+                            token_list_get(p->toks, p->curr + 1);
+                        if (next && next->type == ASSIGN) {
+                                // TODO: SKETCHY, DOUBLE CHECK IF WORKING
+                                advance(p); // consume ident
+                                iter = parse_assign(p);
+                        } else {
+                                iter = parse_expr(p);
+                        }
+                } else {
+                        iter = parse_expr(p);
+                }
+
+                if (!iter) {
+                        ast_node_free(cond);
+                        ast_node_free(init);
+                        return NULL;
+                }
+        }
+
+        if (!consume(
+                p, RIGHT_PARENTHESIS, "expected ')' after for iteration")) {
+                ast_node_free(init);
+                ast_node_free(cond);
+                ast_node_free(iter);
+                return NULL;
+        }
+
+        ASTNode *body = parse_stmt(p);
+        if (!body) {
+                ast_node_free(init);
+                ast_node_free(cond);
+                ast_node_free(iter);
+                return NULL;
+        }
+
+        return node_for_create(init, cond, iter, body);
+}
+
+static ASTNode *parse_print(Parser *p)
+{
+        if (!consume(p, LEFT_PARENTHESIS, "expected '(' after 'print'")) {
+                return NULL;
+        }
+
+        ASTNode *expr = parse_expr(p);
+        if (!expr) {
+                return NULL;
+        }
+
+        if (!consume(p, RIGHT_CURLY_BRACE, "expected ')' after 'print'")) {
+                ast_node_free(expr);
+                return NULL;
+        }
+
+        return node_print_create(expr);
+}
+
+static ASTNode *parse_stmt(Parser *p)
+{
+        // remember empty statements
+        if (match(p, SEMI_COLON)) {
+                return NULL;
+        }
+
+        if (check(p, RIGHT_CURLY_BRACE)) {
+                return parse_stmt_block(p);
+        }
+
+        if (match(p, IF_TOK)) {
+                return parse_if_stmt(p);
+        }
+
+        if (match(p, WHILE_TOK)) {
+                return parse_while(p);
+        }
+
+        if (match(p, FOR_TOK)) {
+                return parse_for(p);
+        }
+
+        // semicolon terminated statements
+        if (match(p, PRINT_TOK)) {
+                ASTNode *print = parse_print(p);
+                if (!print) {
+                        return NULL;
+                }
+                if (!consume(
+                        p, SEMI_COLON, "expected ';' after print statement")) {
+                        ast_node_free(print);
+                        return NULL;
+                }
+                return print;
+        }
+
+        // check types for decl
+        if (check(p, INT_TOK) || check(p, FLOAT_TOK) || check(p, BOOL_TOK) ||
+            check(p, CHAR_TOK) || check(p, STRING_TOK)) {
+                ASTNode *decl = parse_decl(p);
+                if (!decl) {
+                        return NULL;
+                }
+                if (!consume(p, SEMI_COLON, "expected ';' after declaration")) {
+                        ast_node_free(decl);
+                        return NULL;
+                }
+                return decl;
+        }
+
+        // check next for assign token to differentiate vs expr
+        if (check(p, IDENTIFIER)) {
+                struct Token *next = token_list_get(p->toks, p->curr + 1);
+                if (next && next->type == ASSIGN) {
+                        // TODO: SKETCHY, CHECK IF PROPER
+                        advance(p);
+                        ASTNode *assign = parse_assign(p);
+                        if (!assign) {
+                                return NULL;
+                        }
+                        if (!consume(p,
+                                     SEMI_COLON,
+                                     "expected ';' after assignment")) {
+                                ast_node_free(assign);
+                                return NULL;
+                        }
+                        return assign;
+                }
+        }
+
+        ASTNode *expr = parse_expr(p);
+        if (!expr) {
+                return NULL;
+        }
+        if (!consume(
+                p, SEMI_COLON, "expected ';' after expression statement")) {
+                ast_node_free(expr);
+                return NULL;
+        }
+        return expr;
+}
+
+/**
+ * expression parsing forward declarations
+ */
+
+static ASTNode *parse_lor(Parser *p);
+static ASTNode *parse_land(Parser *p);
+static ASTNode *parse_eq(Parser *p);
+static ASTNode *parse_rel(Parser *p);
+static ASTNode *parse_add(Parser *p);
+static ASTNode *parse_mult(Parser *p);
+static ASTNode *parse_pow(Parser *p);
+static ASTNode *parse_unary(Parser *p);
+static ASTNode *parse_primary(Parser *p);
+
+static ASTNode *parse_lor(Parser *p)
+{
+        ASTNode *left = parse_land(p);
+        if (!left) {
+                return NULL;
+        }
+
+        while (match(p, OR)) {
+                ASTNode *right = parse_land(p);
+                if (!right) {
+                        ast_node_free(left);
+                        return NULL;
+                }
+                left = node_binary_op_create(OP_OR, left, right);
+                if (!left) {
+                        ast_node_free(right);
+                        return NULL;
+                }
+        }
+
+        return left;
+}
+
+static ASTNode *parse_land(Parser *p)
+{
+        ASTNode *left = parse_eq(p);
+        if (!left) {
+                return NULL;
+        }
+
+        while (match(p, AND)) {
+                ASTNode *right = parse_eq(p);
+                if (!right) {
+                        ast_node_free(left);
+                        return NULL;
+                }
+                left = node_binary_op_create(OP_AND, left, right);
+                if (!left) {
+                        ast_node_free(right);
+                        return NULL;
+                }
+        }
+
+        return left;
+}
+
+static ASTNode *parse_eq(Parser *p)
+{
+        ASTNode *left = parse_rel(p);
+        if (!left) {
+                return NULL;
+        }
+
+        while (true) {
+                Operator op;
+                if (match(p, EQUAL)) {
+                        op = OP_EQ;
+                } else if (match(p, NOT_EQUAL)) {
+                        op = OP_NEQ;
+                } else {
+                        break;
+                }
+
+                ASTNode *right = parse_rel(p);
+                if (!right) {
+                        ast_node_free(left);
+                        return NULL;
+                }
+
+                left = node_binary_op_create(op, left, right);
+                if (!left) {
+                        ast_node_free(right);
+                        return NULL;
+                }
+        }
+
+        return left;
+}
+
+static ASTNode *parse_rel(Parser *p)
+{
+        ASTNode *left = parse_add(p);
+        if (!left) {
+                return NULL;
+        }
+
+        while (true) {
+                Operator op;
+                if (match(p, LESS_THAN)) {
+                        op = OP_LT;
+                } else if (match(p, LESS_EQUAL)) {
+                        op = OP_LTEQ;
+                } else if (match(p, GREATER_THAN)) {
+                        op = OP_GT;
+                } else if (match(p, GREATER_EQUAL)) {
+                        op = OP_GTEQ;
+                } else {
+                        break;
+                }
+
+                ASTNode *right = parse_add(p);
+                if (!right) {
+                        ast_node_free(left);
+                        return NULL;
+                }
+                left = node_binary_op_create(op, left, right);
+                if (!left) {
+                        ast_node_free(right);
+                        return NULL;
+                }
+        }
+
+        return left;
+}
+
+static ASTNode *parse_add(Parser *p)
+{
+        ASTNode *left = parse_mult(p);
+        if (!left) {
+                return NULL;
+        }
+
+        while (true) {
+                Operator op;
+                if (match(p, PLUS)) {
+                        op = OP_ADD;
+                } else if (match(p, MINUS)) {
+                        op = OP_SUB;
+                } else {
+                        break;
+                }
+
+                ASTNode *right = parse_mult(p);
+                if (!right) {
+                        ast_node_free(left);
+                        return NULL;
+                }
+                left = node_binary_op_create(op, left, right);
+                if (!left) {
+                        ast_node_free(right);
+                        return NULL;
+                }
+        }
+
+        return left;
+}
+
+static ASTNode *parse_mult(Parser *p)
+{
+        ASTNode *left = parse_pow(p);
+        if (!left) {
+                return NULL;
+        }
+
+        while (true) {
+                Operator op;
+                if (match(p, ASTERISK)) {
+                        op = OP_MUL;
+                } else if (match(p, SLASH)) {
+                        op = OP_DIV;
+                } else if (match(p, MODULO)) {
+                        op = OP_MOD;
+                } else if (match(p, DOUBLE_SLASH)) {
+                        op = OP_INTDIV;
+                } else {
+                        break;
+                }
+
+                ASTNode *right = parse_pow(p);
+                if (!right) {
+                        ast_node_free(left);
+                        return NULL;
+                }
+                left = node_binary_op_create(op, left, right);
+                if (!left) {
+                        ast_node_free(right);
+                        return NULL;
+                }
+        }
+
+        return left;
+}
+
+static ASTNode *parse_pow(Parser *p)
+{
+        ASTNode *left = parse_unary(p);
+        if (!left) {
+                return NULL;
+        }
+
+        // (**) is right associative, handle using recursion
+        // for ease. not efficient for deep exponentiation
+        if (match(p, DOUBLE_ASTERISK)) {
+                ASTNode *right = parse_pow(p);
+                if (!right) {
+                        ast_node_free(left);
+                        return NULL;
+                }
+                left = node_binary_op_create(OP_POW, left, right);
+                if (!left) {
+                        ast_node_free(right);
+                        return NULL;
+                }
+        }
+
+        return left;
+}
+
+static ASTNode *parse_unary(Parser *p)
+{
+        /* handles rule using recursion since unary exprs are less
+           likely to nest */
+        if (match(p, NOT)) {
+                ASTNode *operand = parse_unary(p);
+                if (!operand) {
+                        return NULL;
+                }
+                return node_unary_op_create(OP_NOT, operand);
+        }
+
+        if (match(p, MINUS)) {
+                ASTNode *operand = parse_unary(p);
+                if (!operand) {
+                        return NULL;
+                }
+                return node_unary_op_create(OP_NEG, operand);
+        }
+
+        return parse_primary(p);
+}
