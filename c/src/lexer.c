@@ -3,6 +3,24 @@
 #include <string.h>
 #include "lexer.h"
 
+static void lexer_clean(struct Lexer *l)
+{
+        struct TokenList *list = token_list_create();
+        for (size_t i = 0; i < l->tokens->size; i++) {
+                struct Token *tok = token_list_get(l->tokens, i);
+                if (tok->type != WHITESPACE && tok->type != COMMENT &&
+                    tok->type != MULTILINE_COMMENT) {
+                        token_list_insert(list, tok);
+                } else {
+                        free(tok->lexeme);
+                        free(tok);
+                }
+        }
+        // TODO: free old list implementation
+        // token_list_free(l->tokens);
+        l->tokens = list;
+}
+
 void lexer_init(struct Lexer *lexer, char *source)
 {
         lexer->source_code = source;
@@ -112,6 +130,8 @@ void lexer_lex(struct Lexer *lexer)
                         lexer->position = (int)current_pos;
                 }
         }
+
+        lexer_clean(lexer);
 }
 
 void lexer_print_toks(struct Lexer *lx)

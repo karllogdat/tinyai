@@ -16,6 +16,6 @@ typedef struct Parser {
 Parser *parser_create(struct TokenList *toks);
 void parser_free(Parser *p);
 
-ASTNode *parse_program(Parser *p);
+ASTNode *parse(struct TokenList *toks);
 
 #endif

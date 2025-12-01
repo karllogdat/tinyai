@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "lexer.h"
+#include "parser.h"
 
 const char *get_file_extension(const char *filename)
 {
@@ -66,4 +67,7 @@ int main(int argc, char **argv)
         lexer_init(&lexer, src_code);
         lexer_lex(&lexer);
         lexer_print_toks(&lexer);
+
+        ASTNode *ast = parse(lexer.tokens);
+        return 0;
 }

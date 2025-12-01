@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "ast_node.h"
 #include "token.h"
 
@@ -77,7 +78,7 @@ static struct Token *advance(Parser *p)
  */
 static bool check(Parser *p, TokenType type)
 {
-        if (!is_at_end(p)) {
+        if (is_at_end(p)) {
                 return false;
         }
         struct Token *tok = curr(p);
@@ -124,7 +125,7 @@ static bool match_any(Parser *p, int count, ...)
 static struct Token *consume(Parser *p, TokenType type, const char *msg)
 {
         if (check(p, type)) {
-                advance(p);
+                return advance(p);
         }
 
         struct Token *tok = curr(p);
@@ -186,7 +187,7 @@ static ASTNode *parse_expr(Parser *p);
 
 /* non-terminal functions */
 
-ASTNode *parse_program(Parser *p)
+static ASTNode *parse_program(Parser *p)
 {
         StmtListNode *stmts = stmt_list_create();
         if (!stmts)
@@ -216,7 +217,7 @@ static ASTNode *parse_stmt_block(Parser *p)
         if (!stmts)
                 return NULL;
 
-        while (!check(p, RIGHT_CURLY_BRACE) || !is_at_end(p)) {
+        while (!check(p, RIGHT_CURLY_BRACE) && !is_at_end(p)) {
                 ASTNode *stmt = parse_stmt(p);
                 if (stmt) {
                         stmt_list_add(stmts, stmt);
@@ -454,7 +455,7 @@ static ASTNode *parse_for(Parser *p)
         } else {
                 // if not empty and not starting with keyword => assume
                 // assignment
-                struct Token *ident = advance(p);
+                // struct Token *ident = advance(p);
                 init = parse_assign(p);
                 if (!init)
                         return NULL;
@@ -487,7 +488,7 @@ static ASTNode *parse_for(Parser *p)
                             token_list_get(p->toks, p->curr + 1);
                         if (next && next->type == ASSIGN) {
                                 // TODO: SKETCHY, DOUBLE CHECK IF WORKING
-                                advance(p); // consume ident
+                                // advance(p); // consume ident
                                 iter = parse_assign(p);
                         } else {
                                 iter = parse_expr(p);
@@ -533,7 +534,7 @@ static ASTNode *parse_print(Parser *p)
                 return NULL;
         }
 
-        if (!consume(p, RIGHT_CURLY_BRACE, "expected ')' after 'print'")) {
+        if (!consume(p, RIGHT_PARENTHESIS, "expected ')' after 'print'")) {
                 ast_node_free(expr);
                 return NULL;
         }
@@ -548,7 +549,7 @@ static ASTNode *parse_stmt(Parser *p)
                 return NULL;
         }
 
-        if (check(p, RIGHT_CURLY_BRACE)) {
+        if (check(p, LEFT_CURLY_BRACE)) {
                 return parse_stmt_block(p);
         }
 
@@ -597,7 +598,7 @@ static ASTNode *parse_stmt(Parser *p)
                 struct Token *next = token_list_get(p->toks, p->curr + 1);
                 if (next && next->type == ASSIGN) {
                         // TODO: SKETCHY, CHECK IF PROPER
-                        advance(p);
+                        // advance(p);
                         ASTNode *assign = parse_assign(p);
                         if (!assign) {
                                 return NULL;
@@ -867,4 +868,139 @@ static ASTNode *parse_unary(Parser *p)
         }
 
         return parse_primary(p);
+}
+
+static ASTNode *parse_primary(Parser *p)
+{
+        if (match(p, INT_LITERAL)) {
+                LiteralValue val;
+                val.int_val = atoi(prev(p)->lexeme);
+                return node_literal_create(TYPE_INT, val);
+        }
+
+        if (match(p, FLOAT_LITERAL)) {
+                LiteralValue val;
+                val.float_val = atof(prev(p)->lexeme);
+                return node_literal_create(TYPE_FLOAT, val);
+        }
+
+        if (match(p, BOOL_LITERAL)) {
+                LiteralValue val;
+                val.bool_val = strcmp(prev(p)->lexeme, "true") == 0;
+                return node_literal_create(TYPE_BOOL, val);
+        }
+
+        if (match(p, CHAR_LITERAL)) {
+                LiteralValue val;
+                // remember char lexeme is stored as 'c'
+                val.char_val = prev(p)->lexeme[1];
+                return node_literal_create(TYPE_CHAR, val);
+        }
+
+        if (match(p, STRING_LITERAL)) {
+                LiteralValue val;
+                size_t len = strlen(prev(p)->lexeme);
+                // Allocate memory for the string (excluding quotes)
+                val.str_val =
+                    malloc(len - 1); // -2 for quotes, +1 for null terminator
+                if (!val.str_val) {
+                        fprintf(stderr, "malloc failed for string literal\n");
+                        return NULL;
+                }
+                strncpy(val.str_val, prev(p)->lexeme + 1, len - 2);
+                val.str_val[len - 2] = '\0';
+                return node_literal_create(TYPE_STRING, val);
+        }
+
+        // differentiate between normal identifier vs func-call
+        if (match(p, IDENTIFIER)) {
+                char *name = prev(p)->lexeme;
+
+                if (match(p, LEFT_PARENTHESIS)) {
+                        ArgNode *args = NULL;
+                        ArgNode *arg_tail = NULL;
+
+                        if (!check(p, RIGHT_PARENTHESIS)) {
+                                // first argument
+                                ASTNode *arg_expr = parse_expr(p);
+                                if (!arg_expr) {
+                                        return NULL;
+                                }
+
+                                args = arg_node_create(arg_expr, NULL);
+                                arg_tail = args;
+
+                                // remaining arguments
+                                while (match(p, COMMA)) {
+                                        arg_expr = parse_expr(p);
+                                        if (!arg_expr)
+                                                return NULL;
+
+                                        ArgNode *new_arg =
+                                            arg_node_create(arg_expr, NULL);
+                                        arg_tail->next = new_arg;
+                                        arg_tail = new_arg;
+                                }
+                        }
+
+                        if (!consume(p,
+                                     RIGHT_PARENTHESIS,
+                                     "expected ')' after arguments")) {
+                                arg_list_free(args);
+                                return NULL;
+                        }
+
+                        return node_func_call_create(name, args);
+                }
+
+                // just ident
+                return node_ident_create(name);
+        }
+
+        // parenthesized exprs
+        if (match(p, LEFT_PARENTHESIS)) {
+                ASTNode *expr = parse_expr(p);
+                if (!expr) {
+                        return NULL;
+                }
+
+                if (!consume(p,
+                             RIGHT_PARENTHESIS,
+                             "expected ')' after expression")) {
+                        ast_node_free(expr);
+                        return NULL;
+                }
+
+                return expr;
+        }
+
+        err_at_curr(p, "expected expression");
+        printf("unexpected token: %s\n of type: %s\n",
+               curr(p) ? curr(p)->lexeme : "NULL",
+               tok_type_to_str(curr(p) ? curr(p)->type : -1));
+        return NULL;
+}
+
+static ASTNode *parse_expr(Parser *p)
+{
+        return parse_lor(p);
+}
+
+ASTNode *parse(struct TokenList *toks)
+{
+        Parser *p = parser_create(toks);
+        if (!p) {
+                return NULL;
+        }
+
+        ASTNode *ast = parse_program(p);
+        bool has_error = p->has_error;
+        parser_free(p);
+
+        if (has_error) {
+                ast_node_free(ast);
+                return NULL;
+        }
+
+        return ast;
 }

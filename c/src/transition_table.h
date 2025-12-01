@@ -105,4 +105,6 @@ typedef enum {
 
 extern const int STATE_TOKEN_TYPE[STATE_COUNT];
 
+char *tok_type_to_str(TokenType type);
+
 #endif // TRANSITION_TABLE_H
