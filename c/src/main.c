@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "ast_print.h"
 #include "lexer.h"
 #include "parser.h"
 
@@ -69,5 +70,12 @@ int main(int argc, char **argv)
         lexer_print_toks(&lexer);
 
         ASTNode *ast = parse(lexer.tokens);
+        if (ast) {
+                ast_print(ast);
+                ast_node_free(ast);
+        } else {
+                fprintf(stderr, "Parsing failed due to errors.\n");
+        }
+
         return 0;
 }

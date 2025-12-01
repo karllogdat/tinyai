@@ -675,12 +675,25 @@ static ASTNode *parse_stmt(Parser *p)
                                     "unexpected 'elif' or 'else' without "
                                     "preceding 'if'");
                         advance(p);
+                        synchronize(p);
+                        return NULL;
                 } else {
-                        err_at_curr(p, "expected statement");
-                        advance(p);
+                        // assume its an expression statement
+                        ASTNode *expr = parse_expr(p);
+                        if (!expr) {
+                                synchronize(p);
+                                return NULL;
+                        }
+                        if (!consume(
+                                p,
+                                SEMI_COLON,
+                                "expected ';' after expression statement")) {
+                                ast_node_free(expr);
+                                synchronize(p);
+                                return NULL;
+                        }
+                        return expr;
                 }
-                synchronize(p);
-                return NULL;
         }
 
         err_at_curr(p, "expected statement");
