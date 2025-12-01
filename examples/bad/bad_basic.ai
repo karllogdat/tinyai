@@ -1,0 +1,23 @@
+# Missing semicolons
+int x = 5
+float y = 3.14
+
+# Missing identifier
+int = 10;
+
+# Missing assignment value
+int z = ;
+
+# Invalid type
+invalid_type var = 5;
+
+# Unclosed parenthesis in expression
+int a = (5 + 3;
+
+# Missing closing brace
+if (true) {
+    print("hello");
+
+# Extra closing brace
+int b = 5;
+}

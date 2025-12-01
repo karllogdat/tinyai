@@ -1,0 +1,41 @@
+
+# If without condition
+if () {
+    print("no condition");
+}
+
+# If without closing parenthesis
+if (x > 5 {
+    print("missing paren");
+}
+
+# If without body
+if (x > 5);
+
+# While without condition
+while () {
+    print("no condition");
+}
+
+# While without body
+while (x < 10);
+
+# For with malformed parts
+for (;;; {
+    print("too many semicolons");
+}
+
+# For without closing paren
+for (int i = 0; i < 10; i = i + 1 {
+    print("missing paren");
+}
+
+# Elif without if
+elif (x > 5) {
+    print("orphan elif");
+}
+
+# Else without if
+else {
+    print("orphan else");
+}

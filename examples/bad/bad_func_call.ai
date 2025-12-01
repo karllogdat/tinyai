@@ -1,0 +1,14 @@
+# Function call without closing paren
+print("hello";
+
+# Function call with trailing comma
+print("hello",);
+
+# Function call with double comma
+someFunc(x,, y);
+
+# Function call with missing argument
+someFunc(x, , z);
+
+# Empty function name
+();

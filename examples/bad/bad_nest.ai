@@ -1,0 +1,21 @@
+# Mismatched braces
+if (true) {
+    if (false) {
+        print("nested");
+    # Missing closing brace
+}
+
+# Unclosed nesting
+while (x > 0) {
+    if (x > 5) {
+        for (int i = 0; i < 10; i = i + 1) {
+            print("deeply nested");
+        # Missing two closing braces
+}
+
+# Too many closing braces
+if (x > 0) {
+    print("test");
+}
+}
+}
