@@ -172,6 +172,8 @@ static void synchronize(Parser *p)
                 case BOOL_TOK:
                 case CHAR_TOK:
                 case STRING_TOK:
+                case LEFT_CURLY_BRACE:
+                case RIGHT_CURLY_BRACE:
                         return;
                 default:
                         break;
@@ -554,26 +556,40 @@ static ASTNode *parse_stmt(Parser *p)
         }
 
         if (match(p, IF_TOK)) {
-                return parse_if_stmt(p);
+                ASTNode *res = parse_if_stmt(p);
+                if (!res) {
+                        synchronize(p);
+                }
+                return res;
         }
 
         if (match(p, WHILE_TOK)) {
-                return parse_while(p);
+                ASTNode *res = parse_while(p);
+                if (!res) {
+                        synchronize(p);
+                }
+                return res;
         }
 
         if (match(p, FOR_TOK)) {
-                return parse_for(p);
+                ASTNode *res = parse_for(p);
+                if (!res) {
+                        synchronize(p);
+                }
+                return res;
         }
 
         // semicolon terminated statements
         if (match(p, PRINT_TOK)) {
                 ASTNode *print = parse_print(p);
                 if (!print) {
+                        synchronize(p);
                         return NULL;
                 }
                 if (!consume(
                         p, SEMI_COLON, "expected ';' after print statement")) {
                         ast_node_free(print);
+                        synchronize(p);
                         return NULL;
                 }
                 return print;
@@ -584,10 +600,12 @@ static ASTNode *parse_stmt(Parser *p)
             check(p, CHAR_TOK) || check(p, STRING_TOK)) {
                 ASTNode *decl = parse_decl(p);
                 if (!decl) {
+                        synchronize(p);
                         return NULL;
                 }
                 if (!consume(p, SEMI_COLON, "expected ';' after declaration")) {
                         ast_node_free(decl);
+                        synchronize(p);
                         return NULL;
                 }
                 return decl;
@@ -601,12 +619,14 @@ static ASTNode *parse_stmt(Parser *p)
                         // advance(p);
                         ASTNode *assign = parse_assign(p);
                         if (!assign) {
+                                synchronize(p);
                                 return NULL;
                         }
                         if (!consume(p,
                                      SEMI_COLON,
                                      "expected ';' after assignment")) {
                                 ast_node_free(assign);
+                                synchronize(p);
                                 return NULL;
                         }
                         return assign;
@@ -615,11 +635,13 @@ static ASTNode *parse_stmt(Parser *p)
 
         ASTNode *expr = parse_expr(p);
         if (!expr) {
+                synchronize(p);
                 return NULL;
         }
         if (!consume(
                 p, SEMI_COLON, "expected ';' after expression statement")) {
                 ast_node_free(expr);
+                synchronize(p);
                 return NULL;
         }
         return expr;
