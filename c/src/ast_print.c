@@ -96,6 +96,21 @@ static void print_lit(LiteralNode *lit, int lvl)
         printf(")\n");
 }
 
+static void print_stmt_list(StmtListNode *list, int lvl)
+{
+        indent(lvl);
+        if (!list) {
+                printf("(null stmt list)\n");
+                return;
+        }
+
+        printf("StmtList (%zu stmts)\n", list->size);
+
+        for (size_t i = 0; i < list->size; i++) {
+                print_ast(list->stmts[i], lvl + STEP);
+        }
+}
+
 static void print_elif(ElifNode *elif, int lvl)
 {
         while (elif) {
@@ -138,7 +153,7 @@ static void print_ast(ASTNode *node, int lvl)
         case NODE_PROGRAM: {
                 indent(lvl);
                 printf("Program:\n");
-                print_ast((ASTNode *)node->data.stmt_list, lvl + STEP);
+                print_stmt_list(node->data.stmt_list, lvl + STEP);
                 break;
         }
 
@@ -156,7 +171,7 @@ static void print_ast(ASTNode *node, int lvl)
         case NODE_STMT_BLOCK: {
                 indent(lvl);
                 printf("StmtBlock\n");
-                print_ast((ASTNode *)node->data.stmt_list, lvl + STEP);
+                print_stmt_list(node->data.stmt_list, lvl + STEP);
                 break;
         }
 
