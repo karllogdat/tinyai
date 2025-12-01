@@ -677,6 +677,7 @@ static ASTNode *parse_stmt(Parser *p)
                         advance(p);
                 } else {
                         err_at_curr(p, "expected statement");
+                        advance(p);
                 }
                 synchronize(p);
                 return NULL;
