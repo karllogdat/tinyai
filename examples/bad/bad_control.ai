@@ -39,3 +39,6 @@ elif (x > 5) {
 else {
     print("orphan else");
 }
+
+# Good statement
+print("hello");

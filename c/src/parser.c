@@ -130,7 +130,7 @@ static struct Token *consume(Parser *p, TokenType type, const char *msg)
 
         struct Token *tok = curr(p);
         fprintf(stderr,
-                "parse error at line %d, col %d: %s\n",
+                "parse error at line %d, col %d: %s.\n",
                 tok ? tok->line : -1,
                 tok ? tok->col : -1,
                 msg);
@@ -148,10 +148,12 @@ static void err_at_curr(Parser *p, const char *msg)
 
         struct Token *tok = curr(p);
         fprintf(stderr,
-                "parse error at line %d, col %d: %s\n",
+                "parse error at line %d, col %d: %s. got '%s' of type '%s'.\n",
                 tok ? tok->line : -1,
                 tok ? tok->col : -1,
-                msg);
+                msg,
+                tok ? tok->lexeme : "NULL",
+                tok ? tok_type_to_str(tok->type) : "NULL");
 }
 
 static void synchronize(Parser *p)
@@ -164,6 +166,8 @@ static void synchronize(Parser *p)
 
                 switch (curr(p)->type) {
                 case IF_TOK:
+                case ELIF_TOK:
+                case ELSE_TOK:
                 case WHILE_TOK:
                 case FOR_TOK:
                 case PRINT_TOK:
@@ -180,6 +184,16 @@ static void synchronize(Parser *p)
                 }
                 advance(p);
         }
+}
+
+static bool is_stmt_start(Parser *p)
+{
+        TokenType type = curr(p)->type;
+        return type == IF_TOK || type == WHILE_TOK || type == FOR_TOK ||
+            type == PRINT_TOK || type == LEFT_CURLY_BRACE ||
+            type == SEMI_COLON || type == IDENTIFIER || type == INT_TOK ||
+            type == FLOAT_TOK || type == BOOL_TOK || type == CHAR_TOK ||
+            type == STRING_TOK;
 }
 
 /* program level non-terminal forward declarations */
@@ -546,6 +560,13 @@ static ASTNode *parse_print(Parser *p)
 
 static ASTNode *parse_stmt(Parser *p)
 {
+        // printf(
+        //     "parsing statement at token: %s of type: %s at line %d, col
+        //     %d\n", curr(p) ? curr(p)->lexeme : "NULL",
+        //     tok_type_to_str(curr(p) ? curr(p)->type : -1),
+        //     curr(p)->line,
+        //     curr(p)->col);
+
         // remember empty statements
         if (match(p, SEMI_COLON)) {
                 return NULL;
@@ -630,21 +651,40 @@ static ASTNode *parse_stmt(Parser *p)
                                 return NULL;
                         }
                         return assign;
+                } else {
+                        ASTNode *expr = parse_expr(p);
+                        if (!expr) {
+                                synchronize(p);
+                                return NULL;
+                        }
+                        if (!consume(
+                                p,
+                                SEMI_COLON,
+                                "expected ';' after expression statement")) {
+                                ast_node_free(expr);
+                                synchronize(p);
+                                return NULL;
+                        }
+                        return expr;
                 }
         }
 
-        ASTNode *expr = parse_expr(p);
-        if (!expr) {
+        if (!is_stmt_start(p)) {
+                if (check(p, ELIF_TOK) || check(p, ELSE_TOK)) {
+                        err_at_curr(p,
+                                    "unexpected 'elif' or 'else' without "
+                                    "preceding 'if'");
+                        advance(p);
+                } else {
+                        err_at_curr(p, "expected statement");
+                }
                 synchronize(p);
                 return NULL;
         }
-        if (!consume(
-                p, SEMI_COLON, "expected ';' after expression statement")) {
-                ast_node_free(expr);
-                synchronize(p);
-                return NULL;
-        }
-        return expr;
+
+        err_at_curr(p, "expected statement");
+        synchronize(p);
+        return NULL;
 }
 
 /**
@@ -997,9 +1037,6 @@ static ASTNode *parse_primary(Parser *p)
         }
 
         err_at_curr(p, "expected expression");
-        printf("unexpected token: %s\n of type: %s\n",
-               curr(p) ? curr(p)->lexeme : "NULL",
-               tok_type_to_str(curr(p) ? curr(p)->type : -1));
         return NULL;
 }
 
