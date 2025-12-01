@@ -1,0 +1,35 @@
+# Good statement
+int x = 10;
+
+# Bad statement - missing semicolon
+int y = 20
+
+# Good statement - parser should recover
+float z = 3.14;
+
+# Bad statement - invalid operator
+int a = 5 *** 2;
+
+# Good statement
+print("recovered");
+
+# Bad control flow - missing condition
+if () {
+    print("error");
+}
+
+# Good statement
+int b = 100;
+
+# Bad nested structure
+if (x > 5) {
+    int c = 10
+    print("missing semicolon above");
+    while (c > 0 {
+        print("missing paren");
+        c = c - 1;
+    }
+}
+
+# Good statement - test final recovery
+print("done");

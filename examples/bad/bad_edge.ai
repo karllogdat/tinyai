@@ -1,0 +1,20 @@
+# Just semicolons
+;;;;;;;
+
+# Just braces
+{}
+{{}}
+{{{
+
+# Mixed good and bad
+int valid = 5;
+invalid syntax here $ @ #
+float another = 3.14;
+
+# Keywords as identifiers (if not handled)
+int if = 5;
+float while = 3.14;
+
+# Reserved words misuse
+true = false;
+print print("confusion");

@@ -1,0 +1,22 @@
+# Binary operator without right operand
+int x = 5 + ;
+
+# Binary operator without left operand
+int y = * 10;
+
+# Multiple operators in a row
+int z = 5 ++ 3;
+
+# Unmatched parentheses
+int a = ((5 + 3);
+int b = (5 + 3));
+
+# Invalid operator combinations
+int c = 5 */ 3;
+
+# Missing operand in unary
+int d = -;
+int e = !;
+
+# Empty expression
+int f = ();

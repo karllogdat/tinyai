@@ -1,0 +1,25 @@
+# Declaration without identifier
+int;
+float;
+
+# Double declaration on same line
+int x, y;
+
+# Assignment to non-identifier
+5 = x;
+"string" = y;
+
+# Assignment without identifier
+= 10;
+
+# Input without prompt
+x = input();
+
+# Input with non-string prompt
+x = input(123);
+
+# Input without closing paren
+x = input("prompt";
+
+# Multiple assignments
+x = y = 5;
