@@ -100,7 +100,7 @@ referenced by:
 ![if-stmt](diagram/if-stmt.svg)
 
 ```
-if-stmt  ::= 'if' '(' expr ')' stmt ( 'elif' '(' expr ')' stmt )* ["els tm]
+if-stmt  ::= 'if' '(' expr ')' stmt ( 'elif' '(' expr ')' stmt )* ( 'else' stmt )?
 ```
 
 referenced by:

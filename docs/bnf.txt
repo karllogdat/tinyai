@@ -38,7 +38,7 @@ assign ::= ident "=" expr
 /* CONTROL STATEMENTS */
 if-stmt ::= "if" "(" expr ")" stmt
 		      ("elif" "(" expr ")" stmt)*
-		      ["else" stmt]
+		      ("else" stmt)?
 
 
 while-stmt ::= "while" "(" expr ")" stmt
