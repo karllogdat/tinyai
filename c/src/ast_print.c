@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-static const int STEP = 1;
+static const int STEP = 2;
 
 static void print_ast(ASTNode *node, int indent);
 
@@ -206,6 +206,18 @@ static void print_ast(ASTNode *node, int lvl)
                         indent(lvl + STEP);
                         printf("Expr:\n");
                         print_ast(a->expr, lvl + STEP + STEP);
+                }
+                break;
+        }
+
+        case NODE_INPUT: {
+                AssignNode *a = node->data.assign;
+                indent(lvl);
+                printf("InputAssign(%s)\n", a->ident);
+
+                if (a->input_prompt) {
+                        indent(lvl + STEP);
+                        printf("Prompt: \"%s\"\n", a->input_prompt);
                 }
                 break;
         }
