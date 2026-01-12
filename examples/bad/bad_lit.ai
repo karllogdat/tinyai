@@ -1,0 +1,15 @@
+# Unterminated string
+string s = "hello world;
+
+# Empty char literal
+char c = '';
+
+# Multi-char in char literal (might be valid in tokenizer)
+char c2 = 'ab';
+
+# Invalid escape sequences (if your tokenizer doesn't handle them)
+string s2 = "hello\world";
+
+# Malformed numbers
+int x = 12.34.56;
+float y = 1.2.3;
