@@ -1,0 +1,65 @@
+# (6) Declarative statements (optional but used)
+int x;
+float y;
+string name;
+bool flag;
+
+# (1) Input statement
+name = input("Enter your name: ");
+x = input("Enter a number: ");
+
+# (3) Assignment statements
+x = 5;              # assign a literal
+y = x + 3.5;        # assign an expression
+flag = true;        # assign a variable value (later reassigned)
+
+# (2) Output statements (3 kinds)
+print("Welcome to the program");   # output literal
+print(x + 10);                     # output expression
+print(name);                       # output variable
+
+# (4) Conditional statements
+
+# if
+if (x > 0) {
+    print("x is positive");
+}
+
+# if-else
+if (x % 2 == 0) {
+    print("x is even");
+} else {
+    print("x is odd");
+}
+
+# if-elif-else
+if (x < 0) {
+    print("negative");
+} else if (x == 0) {
+    print("zero");
+} else {
+    print("positive");
+}
+
+# (5) Iterative statements
+
+# while loop (not nested)
+while (x > 0) {
+    print(x);
+    x = x - 1;
+}
+
+# nested while loops
+while (flag) {
+    int i = 0;
+    while (i < 3) {
+        print("nested loop");
+        i = i + 1;
+    }
+    flag = false;
+}
+
+# for loop
+for (int j = 0; j < 5; j = j + 1) {
+    print("for loop iteration");
+}
