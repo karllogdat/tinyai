@@ -11,7 +11,9 @@ x = input("Enter a number: ");
 # (3) Assignment statements
 x = 5;              # assign a literal
 y = x + 3.5;        # assign an expression
-flag = true;        # assign a variable value (later reassigned)
+flag = false;       # assign a variable value (later reassigned)
+bool newFlag = true;
+flag = newFlag      # assign a variable to a variable
 
 # (2) Output statements (3 kinds)
 print("Welcome to the program");   # output literal
